@@ -68,18 +68,20 @@ export async function setupAuth(app: Express) {
     done(null, user);
   });
 
-  // Authentication routes
-  app.get("/api/auth/google",
-    passport.authenticate("google", { scope: ["profile", "email"] })
-  );
+  // Authentication routes - only setup Google routes if credentials are available
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    app.get("/api/auth/google",
+      passport.authenticate("google", { scope: ["profile", "email"] })
+    );
 
-  app.get("/api/auth/google/callback",
-    passport.authenticate("google", { failureRedirect: "/" }),
-    (req, res) => {
-      // Successful authentication, redirect home
-      res.redirect("/");
-    }
-  );
+    app.get("/api/auth/google/callback",
+      passport.authenticate("google", { failureRedirect: "/" }),
+      (req, res) => {
+        // Successful authentication, redirect home
+        res.redirect("/");
+      }
+    );
+  }
 
   // User info route
   app.get("/api/auth/user", (req, res) => {

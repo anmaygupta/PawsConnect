@@ -19,7 +19,8 @@ import { AlertTriangle, CheckCircle, Send } from "lucide-react";
 
 const reportSchema = z.object({
   type: z.enum(['lost', 'found']),
-  dogName: z.string().max(100, "Dog name too long").optional(),
+  animalType: z.enum(['dog', 'cat'], { required_error: "Animal type is required" }),
+  petName: z.string().max(100, "Pet name too long").optional(),
   breed: z.string().min(1, "Breed is required").max(100, "Breed name too long"),
   size: z.enum(['small', 'medium', 'large', 'extra-large']),
   age: z.string().min(1, "Age is required").max(50, "Age description too long"),
@@ -66,7 +67,8 @@ export default function ReportForm() {
     resolver: zodResolver(reportSchema),
     defaultValues: {
       type: reportType,
-      dogName: '',
+      animalType: 'dog',
+      petName: '',
       breed: '',
       size: 'medium',
       age: '',
@@ -119,7 +121,7 @@ export default function ReportForm() {
       queryClient.invalidateQueries({ queryKey: ['/api/reports/recent'] });
       toast({
         title: "Report Submitted Successfully",
-        description: `Your ${reportType} dog report has been created and is now visible to the community.`,
+        description: `Your ${reportType} pet report has been created and is now visible to the community.`,
       });
       navigate('/');
     },
@@ -179,15 +181,30 @@ export default function ReportForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Dog Information */}
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Dog Information</h3>
+            <h3 className="text-lg font-semibold">Animal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="dogName">Dog's Name {reportType === 'found' && '(if known)'}</Label>
+                <Label htmlFor="animalType">Animal Type *</Label>
+                <Select onValueChange={(value) => form.setValue('animalType', value as any)} defaultValue="dog">
+                  <SelectTrigger data-testid="select-animal-type">
+                    <SelectValue placeholder="Select animal type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="dog">Dog</SelectItem>
+                    <SelectItem value="cat">Cat</SelectItem>
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.animalType && (
+                  <p className="text-sm text-destructive mt-1">{form.formState.errors.animalType.message}</p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="petName">Pet's Name {reportType === 'found' && '(if known)'}</Label>
                 <Input
-                  id="dogName"
-                  {...form.register('dogName')}
-                  placeholder="Enter dog's name"
-                  data-testid="input-dog-name"
+                  id="petName"
+                  {...form.register('petName')}
+                  placeholder="Enter pet's name"
+                  data-testid="input-pet-name"
                 />
               </div>
               <div>
@@ -195,7 +212,7 @@ export default function ReportForm() {
                 <Input
                   id="breed"
                   {...form.register('breed')}
-                  placeholder="e.g., Golden Retriever"
+                  placeholder="e.g., Golden Retriever, Persian"
                   data-testid="input-breed"
                 />
                 {form.formState.errors.breed && (

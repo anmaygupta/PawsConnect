@@ -58,18 +58,18 @@ export default function Home() {
               <span>Finder</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Help reunite lost dogs with their families or find homes for found pets
+              Help reunite lost cats and dogs with their families or find homes for found pets
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/report")}>
                 <CardHeader className="text-center">
                   <PlusCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-                  <CardTitle className="text-lg">Report Lost Dog</CardTitle>
+                  <CardTitle className="text-lg">Report Lost Pet</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Report a missing dog with photos and details to help the community find them
+                    Report a missing cat or dog with photos and details to help the community find them
                   </p>
                 </CardContent>
               </Card>
@@ -77,11 +77,11 @@ export default function Home() {
               <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/report")}>
                 <CardHeader className="text-center">
                   <PawPrint className="h-12 w-12 text-primary mx-auto mb-4 fill-current" />
-                  <CardTitle className="text-lg">Report Found Dog</CardTitle>
+                  <CardTitle className="text-lg">Report Found Pet</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Found a dog? Report it here to help reunite them with their family
+                    Found a cat or dog? Report it here to help reunite them with their family
                   </p>
                 </CardContent>
               </Card>
@@ -93,7 +93,7 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Search for lost and found dogs in your area by ZIP code
+                    Search for lost and found cats and dogs in your area by ZIP code
                   </p>
                 </CardContent>
               </Card>
@@ -133,7 +133,7 @@ export default function Home() {
                   <PlusCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No Reports Yet</h3>
                   <p className="text-muted-foreground mb-4">
-                    You haven't created any reports yet. Start by reporting a lost or found dog.
+                    You haven't created any reports yet. Start by reporting a lost or found pet.
                   </p>
                   <Button onClick={() => navigate("/report")} data-testid="button-create-first-report">
                     Create Your First Report

@@ -51,11 +51,11 @@ export default function HeroSection() {
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Reuniting Lost Dogs<br />
+            Reuniting Lost Pets<br />
             <span className="text-secondary">with Their Families</span>
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-white/90">
-            Join our community of pet lovers helping bring lost dogs home safely
+            Join our community of pet lovers helping bring lost cats and dogs home safely
           </p>
           
           <div className="glass-effect rounded-lg p-6 mb-8">

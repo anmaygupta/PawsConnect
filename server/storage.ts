@@ -1,0 +1,215 @@
+import {
+  users,
+  dogReports,
+  dogReportImages,
+  emailNotifications,
+  type User,
+  type UpsertUser,
+  type DogReport,
+  type InsertDogReport,
+  type DogReportImage,
+  type InsertDogReportImage,
+  type EmailNotification,
+  type InsertEmailNotification,
+  type DogReportWithImages,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc, like } from "drizzle-orm";
+
+export interface IStorage {
+  // User operations (required for Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Dog report operations
+  createDogReport(report: InsertDogReport, userId: string): Promise<DogReport>;
+  getDogReport(id: string): Promise<DogReportWithImages | undefined>;
+  getDogReportsByZipCode(zipCode: string): Promise<DogReportWithImages[]>;
+  getUserDogReports(userId: string): Promise<DogReportWithImages[]>;
+  updateDogReportStatus(id: string, status: string): Promise<void>;
+  getRecentReports(limit?: number): Promise<DogReportWithImages[]>;
+  
+  // Image operations
+  addReportImage(image: InsertDogReportImage): Promise<DogReportImage>;
+  getReportImages(reportId: string): Promise<DogReportImage[]>;
+  
+  // Email notification operations
+  createEmailNotification(notification: InsertEmailNotification): Promise<EmailNotification>;
+  markEmailAsSent(id: string): Promise<void>;
+}
+
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Dog report operations
+  async createDogReport(report: InsertDogReport, userId: string): Promise<DogReport> {
+    const [createdReport] = await db
+      .insert(dogReports)
+      .values({ ...report, userId })
+      .returning();
+    return createdReport;
+  }
+
+  async getDogReport(id: string): Promise<DogReportWithImages | undefined> {
+    const [report] = await db
+      .select()
+      .from(dogReports)
+      .where(eq(dogReports.id, id));
+    
+    if (!report) return undefined;
+
+    const images = await this.getReportImages(id);
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, report.userId));
+
+    return {
+      ...report,
+      images,
+      user: user!,
+    };
+  }
+
+  async getDogReportsByZipCode(zipCode: string): Promise<DogReportWithImages[]> {
+    const reports = await db
+      .select()
+      .from(dogReports)
+      .where(and(
+        eq(dogReports.zipCode, zipCode),
+        eq(dogReports.status, 'active')
+      ))
+      .orderBy(desc(dogReports.createdAt));
+
+    const reportsWithDetails = await Promise.all(
+      reports.map(async (report) => {
+        const images = await this.getReportImages(report.id);
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, report.userId));
+
+        return {
+          ...report,
+          images,
+          user: user!,
+        };
+      })
+    );
+
+    return reportsWithDetails;
+  }
+
+  async getUserDogReports(userId: string): Promise<DogReportWithImages[]> {
+    const reports = await db
+      .select()
+      .from(dogReports)
+      .where(eq(dogReports.userId, userId))
+      .orderBy(desc(dogReports.createdAt));
+
+    const reportsWithDetails = await Promise.all(
+      reports.map(async (report) => {
+        const images = await this.getReportImages(report.id);
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, report.userId));
+
+        return {
+          ...report,
+          images,
+          user: user!,
+        };
+      })
+    );
+
+    return reportsWithDetails;
+  }
+
+  async updateDogReportStatus(id: string, status: string): Promise<void> {
+    await db
+      .update(dogReports)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(dogReports.id, id));
+  }
+
+  async getRecentReports(limit: number = 6): Promise<DogReportWithImages[]> {
+    const reports = await db
+      .select()
+      .from(dogReports)
+      .where(eq(dogReports.status, 'active'))
+      .orderBy(desc(dogReports.createdAt))
+      .limit(limit);
+
+    const reportsWithDetails = await Promise.all(
+      reports.map(async (report) => {
+        const images = await this.getReportImages(report.id);
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, report.userId));
+
+        return {
+          ...report,
+          images,
+          user: user!,
+        };
+      })
+    );
+
+    return reportsWithDetails;
+  }
+
+  // Image operations
+  async addReportImage(image: InsertDogReportImage): Promise<DogReportImage> {
+    const [createdImage] = await db
+      .insert(dogReportImages)
+      .values(image)
+      .returning();
+    return createdImage;
+  }
+
+  async getReportImages(reportId: string): Promise<DogReportImage[]> {
+    return await db
+      .select()
+      .from(dogReportImages)
+      .where(eq(dogReportImages.reportId, reportId));
+  }
+
+  // Email notification operations
+  async createEmailNotification(notification: InsertEmailNotification): Promise<EmailNotification> {
+    const [createdNotification] = await db
+      .insert(emailNotifications)
+      .values(notification)
+      .returning();
+    return createdNotification;
+  }
+
+  async markEmailAsSent(id: string): Promise<void> {
+    await db
+      .update(emailNotifications)
+      .set({ sent: true, sentAt: new Date() })
+      .where(eq(emailNotifications.id, id));
+  }
+}
+
+export const storage = new DatabaseStorage();

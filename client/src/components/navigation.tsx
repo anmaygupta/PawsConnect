@@ -29,7 +29,7 @@ export default function Navigation() {
         <div className="flex h-16 items-center justify-between">
           <Link href="/">
             <div className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
-              <PawPrint className="h-8 w-8 text-primary mr-3" />
+              <PawPrint className="h-8 w-8 text-primary mr-3 fill-current" />
               <span className="text-xl font-bold text-foreground">Paw</span>
               <PawLogo className="text-primary mx-2" size={24} />
               <span className="text-xl font-bold text-foreground">Finder</span>
@@ -66,7 +66,7 @@ export default function Navigation() {
               <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
                 location === "/donate" ? "text-foreground" : "text-muted-foreground"
               }`}>
-                <PawLogo className="text-primary mr-1 inline" size={16} />
+                <PawPrint className="h-4 w-4 text-primary mr-1 inline fill-current" />
                 Donate
               </span>
             </Link>

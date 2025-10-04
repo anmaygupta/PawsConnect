@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { PlusCircle, Search } from "lucide-react";
+import { PlusCircle, Search, PawPrint } from "lucide-react";
 import PawLogo from "@/components/paw-logo";
 import type { DogReportWithImages } from "@shared/schema";
 
@@ -77,7 +77,7 @@ export default function Home() {
 
               <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/report")}>
                 <CardHeader className="text-center">
-                  <PawLogo className="text-primary mx-auto mb-4" size={48} />
+                  <PawPrint className="h-12 w-12 text-primary mx-auto mb-4 fill-current" />
                   <CardTitle className="text-lg">Report Found Dog</CardTitle>
                 </CardHeader>
                 <CardContent>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { DollarSign, Users, Coffee } from "lucide-react";
+import { DollarSign, Users, Coffee, PawPrint } from "lucide-react";
 import PawLogo from "@/components/paw-logo";
 
 export default function Donate() {
@@ -52,7 +52,7 @@ export default function Donate() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex items-center justify-center mb-4">
-              <PawLogo className="text-primary mr-4" size={48} />
+              <PawPrint className="h-12 w-12 text-primary mr-4 fill-current" />
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
                 Support Paw<PawLogo className="text-primary mx-2" size={40} />Finder
               </h1>
@@ -147,7 +147,7 @@ export default function Donate() {
                   className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
                   data-testid="button-donate"
                 >
-                  <PawLogo className="text-white mr-2" size={20} />
+                  <PawPrint className="h-5 w-5 text-white mr-2 fill-current" />
                   Donate ${getCurrentAmount().toFixed(2)}
                 </Button>
 
@@ -177,7 +177,7 @@ export default function Donate() {
               </Card>
               <Card>
                 <CardContent className="p-6 text-center">
-                  <PawLogo className="text-primary mx-auto mb-4" size={48} />
+                  <PawPrint className="h-12 w-12 text-primary mx-auto mb-4 fill-current" />
                   <h3 className="font-semibold mb-2">Server Costs</h3>
                   <p className="text-sm text-muted-foreground">
                     Help cover hosting, database, and infrastructure costs to keep the platform running

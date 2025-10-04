@@ -29,9 +29,7 @@ export default function Navigation() {
           <Link href="/">
             <div className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
               <PawPrint className="h-8 w-8 text-primary mr-3 fill-current" />
-              <span className="text-xl font-bold text-foreground">Paw</span>
-              <PawPrint className="h-6 w-6 text-primary mx-2 fill-current" />
-              <span className="text-xl font-bold text-foreground">Finder</span>
+              <span className="text-xl font-bold text-foreground">Paw Finder</span>
             </div>
           </Link>
           

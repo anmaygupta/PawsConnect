@@ -28,6 +28,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Statistics route
+  app.get('/api/stats', async (req, res) => {
+    try {
+      const stats = await storage.getStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
   // Dog report routes
   app.get('/api/reports/recent', async (req, res) => {
     try {

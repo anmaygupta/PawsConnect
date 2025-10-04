@@ -14,7 +14,7 @@ import {
   type DogReportWithImages,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, like } from "drizzle-orm";
+import { eq, and, desc, like, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -36,6 +36,13 @@ export interface IStorage {
   // Email notification operations
   createEmailNotification(notification: InsertEmailNotification): Promise<EmailNotification>;
   markEmailAsSent(id: string): Promise<void>;
+  
+  // Statistics operations
+  getStats(): Promise<{
+    dogsReunited: number;
+    activeUsers: number;
+    citiesCovered: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -209,6 +216,35 @@ export class DatabaseStorage implements IStorage {
       .update(emailNotifications)
       .set({ sent: true, sentAt: new Date() })
       .where(eq(emailNotifications.id, id));
+  }
+
+  // Statistics operations
+  async getStats(): Promise<{
+    dogsReunited: number;
+    activeUsers: number;
+    citiesCovered: number;
+  }> {
+    // Count resolved reports (dogs reunited)
+    const [resolvedCount] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(dogReports)
+      .where(eq(dogReports.status, 'resolved'));
+
+    // Count unique users who have created reports
+    const [activeUsersCount] = await db
+      .select({ count: sql<number>`count(distinct ${dogReports.userId})` })
+      .from(dogReports);
+
+    // Count unique ZIP codes (cities covered)
+    const [citiesCoveredCount] = await db
+      .select({ count: sql<number>`count(distinct ${dogReports.zipCode})` })
+      .from(dogReports);
+
+    return {
+      dogsReunited: resolvedCount.count || 0,
+      activeUsers: activeUsersCount.count || 0,
+      citiesCovered: citiesCoveredCount.count || 0,
+    };
   }
 }
 

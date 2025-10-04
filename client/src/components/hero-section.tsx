@@ -38,11 +38,11 @@ export default function HeroSection() {
   };
 
   const handleReportLost = () => {
-    window.location.href = "/api/login";
+    window.location.href = "/api/auth/google";
   };
 
   const handleReportFound = () => {
-    window.location.href = "/api/login";
+    window.location.href = "/api/auth/google";
   };
 
   return (

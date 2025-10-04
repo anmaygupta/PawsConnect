@@ -1,6 +1,7 @@
 // import nodemailer from 'nodemailer'; // Replaced with secure Replit Mail integration
 import type { DogReport, User } from '@shared/schema';
-import { sendEmail } from '../utils/replitmail';
+import { sendEmail, zSmtpMessage } from '../utils/replitmail';
+import { storage } from '../storage';
 
 // Using secure Replit Mail integration instead of hardcoded SMTP
 // const transporter = nodemailer.createTransport({
@@ -14,6 +15,51 @@ import { sendEmail } from '../utils/replitmail';
 // });
 
 export class EmailService {
+  // Helper method for sending emails with proper error handling and status tracking
+  private static async sendEmailWithTracking(
+    emailPayload: any,
+    reportId: string,
+    recipientEmail: string,
+    subject: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Validate email payload with zod schema
+      const validatedPayload = zSmtpMessage.parse(emailPayload);
+      
+      // Create email notification record
+      const notification = await storage.createEmailNotification({
+        reportId,
+        recipientEmail,
+        subject,
+        content: emailPayload.html || emailPayload.text || '',
+      });
+      
+      try {
+        // Send the email
+        await sendEmail(validatedPayload);
+        
+        // Mark as sent on success
+        await storage.markEmailAsSent(notification.id);
+        return { success: true };
+        
+      } catch (sendError) {
+        console.error('Failed to send email:', sendError);
+        // Leave notification as unsent for potential retry
+        return { 
+          success: false, 
+          error: sendError instanceof Error ? sendError.message : 'Unknown email sending error' 
+        };
+      }
+      
+    } catch (validationError) {
+      console.error('Email validation failed:', validationError);
+      return { 
+        success: false, 
+        error: 'Email validation failed: ' + (validationError instanceof Error ? validationError.message : 'Unknown validation error')
+      };
+    }
+  }
+
   static async sendFoundDogNotification(
     lostDogReport: DogReport,
     foundDogReport: DogReport,
@@ -84,11 +130,21 @@ export class EmailService {
       </div>
     `;
 
-    await sendEmail({
-      to: lostDogReport.contactEmail,
-      subject,
-      html: htmlContent,
-    });
+    const result = await this.sendEmailWithTracking(
+      {
+        to: lostDogReport.contactEmail,
+        subject,
+        html: htmlContent,
+      },
+      lostDogReport.id,
+      lostDogReport.contactEmail,
+      subject
+    );
+    
+    if (!result.success) {
+      console.warn(`Non-fatal email failure for match notification (${lostDogReport.id}): ${result.error}`);
+      // Email failure is logged but doesn't break the flow - notification remains unsent for potential retry
+    }
   }
 
   static async sendReportConfirmation(report: DogReport, user: User): Promise<void> {
@@ -141,10 +197,20 @@ export class EmailService {
       </div>
     `;
 
-    await sendEmail({
-      to: report.contactEmail,
-      subject,
-      html: htmlContent,
-    });
+    const result = await this.sendEmailWithTracking(
+      {
+        to: report.contactEmail,
+        subject,
+        html: htmlContent,
+      },
+      report.id,
+      report.contactEmail,
+      subject
+    );
+    
+    if (!result.success) {
+      console.warn(`Non-fatal email failure for report confirmation (${report.id}): ${result.error}`);
+      // Email failure is logged but doesn't break the flow - notification remains unsent for potential retry
+    }
   }
 }

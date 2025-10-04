@@ -166,10 +166,16 @@ export const insertDogReportSchema = createInsertSchema(dogReports).omit({
     .email("Valid email address is required")
     .max(254, "Email address too long"),
   
-  // Reward amount validation
+  // Date validation with coercion from string
+  lastSeenDate: z.coerce.date({
+    required_error: "Last seen date is required",
+    invalid_type_error: "Please provide a valid date"
+  }),
+  
+  // Reward amount validation with string coercion
   rewardAmount: z.union([
-    z.string().regex(/^\d*\.?\d{0,2}$/, "Invalid reward amount format").optional(),
-    z.number().nonnegative("Reward amount must be positive").optional(),
+    z.string().regex(/^\d*\.?\d{0,2}$/, "Invalid reward amount format").transform(val => val === "" ? null : val),
+    z.number().nonnegative("Reward amount must be positive"),
     z.null()
   ]).optional(),
   

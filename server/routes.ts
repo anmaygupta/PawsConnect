@@ -38,17 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Auth routes are handled in server/auth.ts
 
   // Statistics route
   app.get('/api/stats', async (req, res) => {
@@ -77,7 +67,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/reports/search/:zipCode', async (req, res) => {
     try {
       const { zipCode } = req.params;
-      const reports = await storage.getDogReportsByZipCode(zipCode);
+      const { animalType } = req.query;
+      const reports = await storage.getDogReportsByZipCode(zipCode, animalType as string);
       res.json(reports);
     } catch (error) {
       console.error("Error searching reports:", error);

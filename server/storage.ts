@@ -34,7 +34,7 @@ export interface IStorage {
   // Dog report operations
   createDogReport(report: InsertDogReport, userId: string): Promise<DogReport>;
   getDogReport(id: string): Promise<DogReportWithImages | undefined>;
-  getDogReportsByZipCode(zipCode: string): Promise<DogReportWithImages[]>;
+  getDogReportsByZipCode(zipCode: string, animalType?: string): Promise<DogReportWithImages[]>;
   getUserDogReports(userId: string): Promise<DogReportWithImages[]>;
   updateDogReportStatus(id: string, status: string): Promise<void>;
   getRecentReports(limit?: number): Promise<DogReportWithImages[]>;
@@ -119,14 +119,20 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getDogReportsByZipCode(zipCode: string): Promise<DogReportWithImages[]> {
+  async getDogReportsByZipCode(zipCode: string, animalType?: string): Promise<DogReportWithImages[]> {
+    const conditions = [
+      eq(dogReports.zipCode, zipCode),
+      eq(dogReports.status, 'active')
+    ];
+    
+    if (animalType) {
+      conditions.push(eq(dogReports.animalType, animalType));
+    }
+    
     const reports = await db
       .select()
       .from(dogReports)
-      .where(and(
-        eq(dogReports.zipCode, zipCode),
-        eq(dogReports.status, 'active')
-      ))
+      .where(and(...conditions))
       .orderBy(desc(dogReports.createdAt));
 
     const reportsWithDetails = await Promise.all(

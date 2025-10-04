@@ -20,7 +20,7 @@ export class EmailService {
     ownerUser: User,
     finderUser: User
   ): Promise<void> {
-    const subject = `🐕 Possible Match Found for ${lostDogReport.dogName || 'Your Dog'}!`;
+    const subject = `🐾 Possible Match Found for ${lostDogReport.petName || `Your ${lostDogReport.animalType === 'cat' ? 'Cat' : 'Dog'}`}!`;
     
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -33,10 +33,10 @@ export class EmailService {
           
           <p>Hello ${ownerUser.firstName || 'Pet Owner'},</p>
           
-          <p>Someone has reported finding a dog that might match your lost pet <strong>${lostDogReport.dogName || 'your dog'}</strong>!</p>
+          <p>Someone has reported finding a ${foundDogReport.animalType} that might match your lost pet <strong>${lostDogReport.petName || `your ${lostDogReport.animalType}`}</strong>!</p>
           
           <div style="background: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
-            <h3 style="color: #1f2937; margin-top: 0;">Found Dog Details:</h3>
+            <h3 style="color: #1f2937; margin-top: 0;">Found ${foundDogReport.animalType === 'cat' ? 'Cat' : 'Dog'} Details:</h3>
             <p><strong>Breed:</strong> ${foundDogReport.breed}</p>
             <p><strong>Size:</strong> ${foundDogReport.size}</p>
             <p><strong>Color:</strong> ${foundDogReport.primaryColor}</p>
@@ -58,13 +58,13 @@ export class EmailService {
             <li>Contact the finder using the information above</li>
             <li>Arrange a safe meeting in a public place</li>
             <li>Bring identification and photos of your pet</li>
-            <li>If it's your dog, please update your report status on Paw Finder</li>
+            <li>If it's your pet, please update your report status on PawsConnect</li>
           </ol>
           
           <div style="text-align: center; margin: 30px 0;">
             <a href="${process.env.FRONTEND_URL || 'http://localhost:5000'}" 
                style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-              View on Paw Finder
+              View on PawsConnect
             </a>
           </div>
           
@@ -73,13 +73,13 @@ export class EmailService {
             • Meet in a well-lit, public location<br>
             • Bring a friend if possible<br>
             • Trust your instincts<br>
-            • Verify the dog's identity with photos, microchip, or other identifying features
+            • Verify the pet's identity with photos, microchip, or other identifying features
           </p>
         </div>
         
         <div style="background: #374151; color: white; padding: 20px; text-align: center; font-size: 14px;">
-          <p>This email was sent by Paw Finder - Reuniting Lost Dogs with Their Families</p>
-          <p>If this is not your dog, please disregard this message.</p>
+          <p>This email was sent by PawsConnect - Reuniting Lost Pets with Their Families</p>
+          <p>If this is not your pet, please disregard this message.</p>
         </div>
       </div>
     `;
@@ -92,7 +92,7 @@ export class EmailService {
   }
 
   static async sendReportConfirmation(report: DogReport, user: User): Promise<void> {
-    const subject = `${report.type === 'lost' ? '🚨 Lost' : '✅ Found'} Dog Report Confirmed - ${report.dogName || 'Unnamed Dog'}`;
+    const subject = `${report.type === 'lost' ? '🚨 Lost' : '✅ Found'} ${report.animalType === 'cat' ? 'Cat' : 'Dog'} Report Confirmed - ${report.petName || `Unnamed ${report.animalType === 'cat' ? 'Cat' : 'Dog'}`}`;
     
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -105,11 +105,11 @@ export class EmailService {
           
           <p>Hello ${user.firstName || 'User'},</p>
           
-          <p>Thank you for submitting a ${report.type} dog report. Your report is now active and visible to the community.</p>
+          <p>Thank you for submitting a ${report.type} ${report.animalType} report. Your report is now active and visible to the community.</p>
           
           <div style="background: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${report.type === 'lost' ? '#ef4444' : '#10b981'};">
-            <h3 style="color: #1f2937; margin-top: 0;">${report.type === 'lost' ? 'Lost' : 'Found'} Dog Details:</h3>
-            <p><strong>Name:</strong> ${report.dogName || 'Not provided'}</p>
+            <h3 style="color: #1f2937; margin-top: 0;">${report.type === 'lost' ? 'Lost' : 'Found'} ${report.animalType === 'cat' ? 'Cat' : 'Dog'} Details:</h3>
+            <p><strong>Name:</strong> ${report.petName || 'Not provided'}</p>
             <p><strong>Breed:</strong> ${report.breed}</p>
             <p><strong>Size:</strong> ${report.size}</p>
             <p><strong>Color:</strong> ${report.primaryColor}</p>
@@ -135,7 +135,7 @@ export class EmailService {
         </div>
         
         <div style="background: #374151; color: white; padding: 20px; text-align: center; font-size: 14px;">
-          <p>Paw Finder - Reuniting Lost Dogs with Their Families</p>
+          <p>PawsConnect - Reuniting Lost Pets with Their Families</p>
           <p>Don't lose hope - we're here to help bring your pet home safely.</p>
         </div>
       </div>

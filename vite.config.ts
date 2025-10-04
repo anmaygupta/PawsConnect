@@ -32,6 +32,10 @@ export default defineConfig({
   },
   optimizeDeps: {
     noDiscovery: true,
+    include: [
+      "react-dom/client",
+      "cookie"
+    ],
     exclude: [
       "use-sync-external-store/shim",
       "use-sync-external-store"

@@ -19,21 +19,38 @@ import { AlertTriangle, CheckCircle, Send } from "lucide-react";
 
 const reportSchema = z.object({
   type: z.enum(['lost', 'found']),
-  dogName: z.string().optional(),
-  breed: z.string().min(1, "Breed is required"),
+  dogName: z.string().max(100, "Dog name too long").optional(),
+  breed: z.string().min(1, "Breed is required").max(100, "Breed name too long"),
   size: z.enum(['small', 'medium', 'large', 'extra-large']),
-  age: z.string().min(1, "Age is required"),
-  primaryColor: z.string().min(1, "Primary color is required"),
+  age: z.string().min(1, "Age is required").max(50, "Age description too long"),
+  primaryColor: z.string().min(1, "Primary color is required").max(50, "Color description too long"),
   gender: z.enum(['male', 'female']),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  lastSeenLocation: z.string().min(1, "Location is required"),
-  zipCode: z.string().min(5, "Valid ZIP code is required"),
+  description: z.string()
+    .min(10, "Description must be at least 10 characters")
+    .max(2000, "Description is too long (max 2000 characters)")
+    .refine(val => !/<script|javascript:|data:|vbscript:/i.test(val), "Invalid characters detected"),
+  lastSeenLocation: z.string()
+    .min(1, "Location is required")
+    .max(200, "Location description too long"),
+  zipCode: z.string()
+    .regex(/^\d{5}(-\d{4})?$/, "ZIP code must be in format 12345 or 12345-6789")
+    .min(5, "ZIP code is required"),
   lastSeenDate: z.string().min(1, "Date is required"),
   lastSeenTime: z.string().optional(),
-  contactName: z.string().min(1, "Your name is required"),
-  contactPhone: z.string().min(10, "Valid phone number is required"),
-  contactEmail: z.string().email("Valid email address is required"),
-  rewardAmount: z.string().optional(),
+  contactName: z.string()
+    .min(1, "Your name is required")
+    .max(100, "Name too long")
+    .regex(/^[a-zA-Z\s\-'\.]+$/, "Name contains invalid characters"),
+  contactPhone: z.string()
+    .regex(/^(\+1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/, "Please enter a valid US phone number"),
+  contactEmail: z.string()
+    .email("Valid email address is required")
+    .max(254, "Email address too long"),
+  rewardAmount: z.string()
+    .regex(/^\d*\.?\d{0,2}$/, "Invalid reward amount format")
+    .optional(),
+  // Anti-bot honeypot field (hidden from users)
+  website: z.string().max(0, "Spam detected").optional(),
 });
 
 type ReportFormData = z.infer<typeof reportSchema>;
@@ -64,6 +81,7 @@ export default function ReportForm() {
       contactPhone: '',
       contactEmail: '',
       rewardAmount: '',
+      website: '', // Honeypot field
     },
   });
 
@@ -373,6 +391,18 @@ export default function ReportForm() {
               </div>
             </div>
           )}
+
+          {/* Anti-bot honeypot field - hidden from users */}
+          <div style={{ display: 'none' }}>
+            <Label htmlFor="website">Website (do not fill)</Label>
+            <Input
+              id="website"
+              type="text"
+              {...form.register('website')}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
 
           {/* Photo Upload */}
           <div className="space-y-6">

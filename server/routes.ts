@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import express from "express";
 import path from "path";
+import rateLimit from "express-rate-limit";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { upload } from "./middleware/upload";
@@ -10,6 +11,26 @@ import { insertDogReportSchema, insertStorySchema, insertStoryCommentSchema } fr
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Security middleware - Rate limiting
+  const reportRateLimit = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 report submissions per 15 minutes
+    message: { message: "Too many report submissions. Please try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  const generalRateLimit = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes  
+    max: 200, // Limit each IP to 200 requests per 15 minutes
+    message: { message: "Too many requests from this IP. Please try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  // Apply general rate limiting to all routes
+  app.use('/api', generalRateLimit);
+
   // Auth middleware
   await setupAuth(app);
 
@@ -88,13 +109,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/reports', isAuthenticated, upload.array('images', 10), async (req: any, res) => {
+  app.post('/api/reports', reportRateLimit, isAuthenticated, upload.array('images', 10), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
+      }
+
+      // Anti-bot security check - reject if honeypot field is filled
+      if (req.body.website && req.body.website.trim() !== '') {
+        console.warn(`Potential bot detected from IP ${req.ip}: honeypot field filled`);
+        return res.status(400).json({ message: "Invalid form submission detected" });
       }
 
       // Validate request body

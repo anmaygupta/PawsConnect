@@ -127,12 +127,52 @@ export const storyComments = pgTable("story_comments", {
 });
 
 // Schema validation
+// Enhanced validation schema with security measures
 export const insertDogReportSchema = createInsertSchema(dogReports).omit({
   id: true,
   userId: true,
   status: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Enhanced ZIP code validation
+  zipCode: z.string()
+    .regex(/^\d{5}(-\d{4})?$/, "ZIP code must be in format 12345 or 12345-6789")
+    .min(5, "ZIP code is required"),
+  
+  // Enhanced text field validation with security checks
+  dogName: z.string().max(100, "Dog name too long").optional(),
+  breed: z.string().min(1, "Breed is required").max(100, "Breed name too long"),
+  age: z.string().min(1, "Age is required").max(50, "Age description too long"),
+  primaryColor: z.string().min(1, "Primary color is required").max(50, "Color description too long"),
+  description: z.string()
+    .min(10, "Description must be at least 10 characters")
+    .max(2000, "Description is too long (max 2000 characters)")
+    .refine(val => !/<script|javascript:|data:|vbscript:/i.test(val), "Invalid characters detected"),
+  lastSeenLocation: z.string()
+    .min(1, "Location is required")
+    .max(200, "Location description too long"),
+  
+  // Enhanced contact validation
+  contactName: z.string()
+    .min(1, "Your name is required")
+    .max(100, "Name too long")
+    .regex(/^[a-zA-Z\s\-'\.]+$/, "Name contains invalid characters"),
+  contactPhone: z.string()
+    .regex(/^(\+1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/, "Please enter a valid US phone number"),
+  contactEmail: z.string()
+    .email("Valid email address is required")
+    .max(254, "Email address too long"),
+  
+  // Reward amount validation
+  rewardAmount: z.union([
+    z.string().regex(/^\d*\.?\d{0,2}$/, "Invalid reward amount format").optional(),
+    z.number().nonnegative("Reward amount must be positive").optional(),
+    z.null()
+  ]).optional(),
+  
+  // Anti-bot honeypot field
+  website: z.string().max(0, "Spam detected").optional(),
 });
 
 export const insertDogReportImageSchema = createInsertSchema(dogReportImages).omit({

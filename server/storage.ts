@@ -3,6 +3,9 @@ import {
   dogReports,
   dogReportImages,
   emailNotifications,
+  stories,
+  storyLikes,
+  storyComments,
   type User,
   type UpsertUser,
   type DogReport,
@@ -12,6 +15,13 @@ import {
   type EmailNotification,
   type InsertEmailNotification,
   type DogReportWithImages,
+  type Story,
+  type InsertStory,
+  type StoryLike,
+  type InsertStoryLike,
+  type StoryComment,
+  type InsertStoryComment,
+  type StoryWithDetails,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, like, sql } from "drizzle-orm";
@@ -43,6 +53,18 @@ export interface IStorage {
     activeUsers: number;
     citiesCovered: number;
   }>;
+
+  // Story operations
+  createStory(story: InsertStory, userId: string): Promise<Story>;
+  getStories(): Promise<StoryWithDetails[]>;
+  getStory(id: string): Promise<StoryWithDetails | undefined>;
+  
+  // Story like operations
+  toggleStoryLike(storyId: string, userId: string): Promise<{ liked: boolean; likesCount: number }>;
+  
+  // Story comment operations
+  addStoryComment(comment: InsertStoryComment, userId: string): Promise<StoryComment>;
+  getStoryComments(storyId: string): Promise<(StoryComment & { user: User })[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -245,6 +267,167 @@ export class DatabaseStorage implements IStorage {
       activeUsers: activeUsersCount.count || 0,
       citiesCovered: citiesCoveredCount.count || 0,
     };
+  }
+
+  // Story operations
+  async createStory(story: InsertStory, userId: string): Promise<Story> {
+    const [createdStory] = await db
+      .insert(stories)
+      .values({ ...story, userId })
+      .returning();
+    return createdStory;
+  }
+
+  async getStories(): Promise<StoryWithDetails[]> {
+    const storiesData = await db
+      .select()
+      .from(stories)
+      .orderBy(desc(stories.createdAt));
+
+    const storiesWithDetails = await Promise.all(
+      storiesData.map(async (story) => {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, story.userId));
+
+        const comments = await this.getStoryComments(story.id);
+
+        return {
+          ...story,
+          user: user!,
+          comments,
+        };
+      })
+    );
+
+    return storiesWithDetails;
+  }
+
+  async getStory(id: string): Promise<StoryWithDetails | undefined> {
+    const [story] = await db
+      .select()
+      .from(stories)
+      .where(eq(stories.id, id));
+    
+    if (!story) return undefined;
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, story.userId));
+
+    const comments = await this.getStoryComments(id);
+
+    return {
+      ...story,
+      user: user!,
+      comments,
+    };
+  }
+
+  // Story like operations
+  async toggleStoryLike(storyId: string, userId: string): Promise<{ liked: boolean; likesCount: number }> {
+    // Check if user already liked this story
+    const [existingLike] = await db
+      .select()
+      .from(storyLikes)
+      .where(and(
+        eq(storyLikes.storyId, storyId),
+        eq(storyLikes.userId, userId)
+      ));
+
+    if (existingLike) {
+      // Unlike the story
+      await db
+        .delete(storyLikes)
+        .where(and(
+          eq(storyLikes.storyId, storyId),
+          eq(storyLikes.userId, userId)
+        ));
+
+      // Decrement likes count
+      await db
+        .update(stories)
+        .set({ 
+          likesCount: sql`${stories.likesCount} - 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(stories.id, storyId));
+
+      // Get updated count
+      const [story] = await db
+        .select({ likesCount: stories.likesCount })
+        .from(stories)
+        .where(eq(stories.id, storyId));
+
+      return { liked: false, likesCount: story?.likesCount || 0 };
+    } else {
+      // Like the story
+      await db
+        .insert(storyLikes)
+        .values({ storyId, userId });
+
+      // Increment likes count
+      await db
+        .update(stories)
+        .set({ 
+          likesCount: sql`${stories.likesCount} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(stories.id, storyId));
+
+      // Get updated count
+      const [story] = await db
+        .select({ likesCount: stories.likesCount })
+        .from(stories)
+        .where(eq(stories.id, storyId));
+
+      return { liked: true, likesCount: story?.likesCount || 0 };
+    }
+  }
+
+  // Story comment operations
+  async addStoryComment(comment: InsertStoryComment, userId: string): Promise<StoryComment> {
+    const [createdComment] = await db
+      .insert(storyComments)
+      .values({ ...comment, userId })
+      .returning();
+
+    // Increment comments count
+    await db
+      .update(stories)
+      .set({ 
+        commentsCount: sql`${stories.commentsCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(stories.id, comment.storyId));
+
+    return createdComment;
+  }
+
+  async getStoryComments(storyId: string): Promise<(StoryComment & { user: User })[]> {
+    const commentsData = await db
+      .select()
+      .from(storyComments)
+      .where(eq(storyComments.storyId, storyId))
+      .orderBy(desc(storyComments.createdAt));
+
+    const commentsWithUsers = await Promise.all(
+      commentsData.map(async (comment) => {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, comment.userId));
+
+        return {
+          ...comment,
+          user: user!,
+        };
+      })
+    );
+
+    return commentsWithUsers;
   }
 }
 

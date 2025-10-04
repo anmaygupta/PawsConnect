@@ -9,6 +9,7 @@ import {
   integer,
   boolean,
   decimal,
+  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -93,6 +94,38 @@ export const emailNotifications = pgTable("email_notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Stories table
+export const stories = pgTable("stories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  likesCount: integer("likes_count").notNull().default(0),
+  commentsCount: integer("comments_count").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Story likes table
+export const storyLikes = pgTable("story_likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  storyId: varchar("story_id").notNull().references(() => stories.id, { onDelete: 'cascade' }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("story_likes_user_story_unique").on(table.storyId, table.userId),
+]);
+
+// Story comments table
+export const storyComments = pgTable("story_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  storyId: varchar("story_id").notNull().references(() => stories.id, { onDelete: 'cascade' }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema validation
 export const insertDogReportSchema = createInsertSchema(dogReports).omit({
   id: true,
@@ -114,6 +147,26 @@ export const insertEmailNotificationSchema = createInsertSchema(emailNotificatio
   createdAt: true,
 });
 
+export const insertStorySchema = createInsertSchema(stories).omit({
+  id: true,
+  userId: true,
+  likesCount: true,
+  commentsCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertStoryLikeSchema = createInsertSchema(storyLikes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStoryCommentSchema = createInsertSchema(storyComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -123,9 +176,21 @@ export type InsertDogReportImage = z.infer<typeof insertDogReportImageSchema>;
 export type DogReportImage = typeof dogReportImages.$inferSelect;
 export type InsertEmailNotification = z.infer<typeof insertEmailNotificationSchema>;
 export type EmailNotification = typeof emailNotifications.$inferSelect;
+export type InsertStory = z.infer<typeof insertStorySchema>;
+export type Story = typeof stories.$inferSelect;
+export type InsertStoryLike = z.infer<typeof insertStoryLikeSchema>;
+export type StoryLike = typeof storyLikes.$inferSelect;
+export type InsertStoryComment = z.infer<typeof insertStoryCommentSchema>;
+export type StoryComment = typeof storyComments.$inferSelect;
 
 // Extended types with relations
 export type DogReportWithImages = DogReport & {
   images: DogReportImage[];
   user: User;
+};
+
+export type StoryWithDetails = Story & {
+  user: User;
+  comments: (StoryComment & { user: User })[];
+  userHasLiked?: boolean;
 };

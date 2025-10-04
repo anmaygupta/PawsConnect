@@ -59,12 +59,12 @@ export default function Navigation() {
                 </Link>
               </>
             )}
-            <Link href="/donate">
+            <Link href="/stories">
               <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
-                location === "/donate" ? "text-foreground" : "text-muted-foreground"
+                location === "/stories" ? "text-foreground" : "text-muted-foreground"
               }`}>
                 <PawPrint className="h-4 w-4 text-primary mr-1 inline fill-current" />
-                Donate
+                Stories
               </span>
             </Link>
           </nav>

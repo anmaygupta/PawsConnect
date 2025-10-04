@@ -8,8 +8,7 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Search from "@/pages/search";
 import Report from "@/pages/report";
-import Donate from "@/pages/donate";
-import Checkout from "@/pages/checkout";
+import Stories from "@/pages/stories";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,8 +19,7 @@ function Router() {
       {isLoading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
-          <Route path="/donate" component={Donate} />
-          <Route path="/checkout" component={Checkout} />
+          <Route path="/stories" component={Stories} />
         </>
       ) : (
         <>
@@ -29,8 +27,7 @@ function Router() {
           <Route path="/search" component={Search} />
           <Route path="/search/:zipCode" component={Search} />
           <Route path="/report" component={Report} />
-          <Route path="/donate" component={Donate} />
-          <Route path="/checkout" component={Checkout} />
+          <Route path="/stories" component={Stories} />
         </>
       )}
       <Route component={NotFound} />

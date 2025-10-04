@@ -6,14 +6,8 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { upload } from "./middleware/upload";
 import { EmailService } from "./services/emailService";
-import { insertDogReportSchema } from "@shared/schema";
+import { insertDogReportSchema, insertStorySchema, insertStoryCommentSchema } from "@shared/schema";
 import { z } from "zod";
-import Stripe from "stripe";
-
-// Initialize Stripe only if secret key is available
-const stripe = process.env.STRIPE_SECRET_KEY 
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" })
-  : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -45,34 +39,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe payment route for donations
-  app.post("/api/create-payment-intent", async (req, res) => {
-    try {
-      if (!stripe) {
-        return res.status(500).json({ message: "Stripe not configured. Please add STRIPE_SECRET_KEY environment variable." });
-      }
-
-      const { amount, message } = req.body;
-      
-      if (!amount || amount < 1) {
-        return res.status(400).json({ message: "Invalid amount" });
-      }
-
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: "usd",
-        metadata: {
-          type: "donation",
-          message: message || "",
-        },
-      });
-
-      res.json({ clientSecret: paymentIntent.client_secret });
-    } catch (error: any) {
-      console.error("Stripe error:", error);
-      res.status(500).json({ message: "Error creating payment intent: " + error.message });
-    }
-  });
 
   // Dog report routes
   app.get('/api/reports/recent', async (req, res) => {
@@ -221,6 +187,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating report status:", error);
       res.status(500).json({ message: "Failed to update report status" });
+    }
+  });
+
+  // Story routes
+  app.get('/api/stories', async (req, res) => {
+    try {
+      const stories = await storage.getStories();
+      res.json(stories);
+    } catch (error) {
+      console.error("Error fetching stories:", error);
+      res.status(500).json({ message: "Failed to fetch stories" });
+    }
+  });
+
+  app.post('/api/stories', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const storyData = insertStorySchema.parse(req.body);
+      
+      const story = await storage.createStory(storyData, userId);
+      const completeStory = await storage.getStory(story.id);
+      
+      res.status(201).json(completeStory);
+    } catch (error) {
+      console.error("Error creating story:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid story data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create story" });
+      }
+    }
+  });
+
+  app.post('/api/stories/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = req.params.id;
+      const userId = req.user.claims.sub;
+      
+      const result = await storage.toggleStoryLike(storyId, userId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error toggling story like:", error);
+      res.status(500).json({ message: "Failed to toggle like" });
+    }
+  });
+
+  app.post('/api/stories/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = req.params.id;
+      const userId = req.user.claims.sub;
+      const commentData = insertStoryCommentSchema.parse({
+        ...req.body,
+        storyId
+      });
+      
+      const comment = await storage.addStoryComment(commentData, userId);
+      
+      // Get the comment with user data by fetching the complete story
+      const completeStory = await storage.getStory(storyId);
+      const commentWithUser = completeStory?.comments.find(c => c.id === comment.id);
+      
+      res.status(201).json(commentWithUser);
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid comment data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to add comment" });
+      }
     }
   });
 

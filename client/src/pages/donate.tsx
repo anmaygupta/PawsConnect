@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Heart, DollarSign, Users, Coffee } from "lucide-react";
+import { DollarSign, Users, Coffee } from "lucide-react";
 import PawLogo from "@/components/paw-logo";
 
 export default function Donate() {
@@ -52,7 +52,7 @@ export default function Donate() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex items-center justify-center mb-4">
-              <Heart className="h-12 w-12 text-red-500 mr-4" />
+              <PawLogo className="text-primary mr-4" size={48} />
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
                 Support Paw<PawLogo className="text-primary mx-2" size={40} />Finder
               </h1>
@@ -147,7 +147,7 @@ export default function Donate() {
                   className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
                   data-testid="button-donate"
                 >
-                  <Heart className="h-5 w-5 mr-2" />
+                  <PawLogo className="text-white mr-2" size={20} />
                   Donate ${getCurrentAmount().toFixed(2)}
                 </Button>
 

@@ -19,6 +19,13 @@ export default function Search() {
 
   const { data: reports = [], isLoading, error } = useQuery<DogReportWithImages[]>({
     queryKey: ['/api/reports/search', searchZip],
+    queryFn: async () => {
+      const response = await fetch(`/api/reports/search/${searchZip}`);
+      if (!response.ok) {
+        throw new Error('Failed to search reports');
+      }
+      return response.json();
+    },
     enabled: !!searchZip,
   });
 

@@ -29,14 +29,18 @@ export default defineConfig({
     emptyOutDir: true,
   },
   optimizeDeps: {
-    disabled: true,
+    noDiscovery: true,
   },
   server: {
     host: "0.0.0.0",
     port: 5000,
+    proxy: {
+      "/api": "http://localhost:3000"
+    },
     fs: {
       strict: true,
       deny: ["**/.*"],
+      allow: [path.resolve(import.meta.dirname, "shared")],
     },
   },
 });

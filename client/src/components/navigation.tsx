@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, PlusCircle, Search, Heart } from "lucide-react";
+import { User, LogOut, PlusCircle, Search } from "lucide-react";
 import PawLogo from "@/components/paw-logo";
 
 export default function Navigation() {
@@ -40,35 +40,35 @@ export default function Navigation() {
             {isAuthenticated && (
               <>
                 <Link href="/">
-                  <a className={`text-sm font-medium transition-colors hover:text-foreground ${
+                  <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
                     location === "/" ? "text-foreground" : "text-muted-foreground"
                   }`}>
                     Home
-                  </a>
+                  </span>
                 </Link>
                 <Link href="/search">
-                  <a className={`text-sm font-medium transition-colors hover:text-foreground ${
+                  <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
                     location.startsWith("/search") ? "text-foreground" : "text-muted-foreground"
                   }`}>
                     Search
-                  </a>
+                  </span>
                 </Link>
                 <Link href="/report">
-                  <a className={`text-sm font-medium transition-colors hover:text-foreground ${
+                  <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
                     location === "/report" ? "text-foreground" : "text-muted-foreground"
                   }`}>
                     Report
-                  </a>
+                  </span>
                 </Link>
               </>
             )}
             <Link href="/donate">
-              <a className={`text-sm font-medium transition-colors hover:text-foreground ${
+              <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
                 location === "/donate" ? "text-foreground" : "text-muted-foreground"
               }`}>
-                <Heart className="h-4 w-4 mr-1 inline text-red-500" />
+                <PawLogo className="text-primary mr-1 inline" size={16} />
                 Donate
-              </a>
+              </span>
             </Link>
           </nav>
           

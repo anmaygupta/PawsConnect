@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -15,23 +15,23 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
-    <Switch>
+    <Routes>
       {isLoading || !isAuthenticated ? (
         <>
-          <Route path="/" component={Landing} />
-          <Route path="/stories" component={Stories} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/stories" element={<Stories />} />
         </>
       ) : (
         <>
-          <Route path="/" component={Home} />
-          <Route path="/search" component={Search} />
-          <Route path="/search/:zipCode" component={Search} />
-          <Route path="/report" component={Report} />
-          <Route path="/stories" component={Stories} />
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/search/:zipCode" element={<Search />} />
+          <Route path="/report" element={<Report />} />
+          <Route path="/stories" element={<Stories />} />
         </>
       )}
-      <Route component={NotFound} />
-    </Switch>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
@@ -39,8 +39,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <BrowserRouter>
+          <Toaster />
+          <Router />
+        </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );

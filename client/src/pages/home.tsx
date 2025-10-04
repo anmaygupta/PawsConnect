@@ -6,14 +6,14 @@ import RecentReports from "@/components/recent-reports";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { PlusCircle, Search, PawPrint } from "lucide-react";
 import type { DogReportWithImages } from "@shared/schema";
 
 export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function Home() {
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/report")}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/report")}>
                 <CardHeader className="text-center">
                   <PlusCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
                   <CardTitle className="text-lg">Report Lost Dog</CardTitle>
@@ -74,7 +74,7 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/report")}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/report")}>
                 <CardHeader className="text-center">
                   <PawPrint className="h-12 w-12 text-primary mx-auto mb-4 fill-current" />
                   <CardTitle className="text-lg">Report Found Dog</CardTitle>
@@ -86,7 +86,7 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/search")}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/search")}>
                 <CardHeader className="text-center">
                   <Search className="h-12 w-12 text-primary mx-auto mb-4" />
                   <CardTitle className="text-lg">Search Reports</CardTitle>
@@ -108,7 +108,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold text-foreground">Your Reports</h2>
-              <Button onClick={() => setLocation("/report")} data-testid="button-create-report">
+              <Button onClick={() => navigate("/report")} data-testid="button-create-report">
                 <PlusCircle className="h-4 w-4 mr-2" />
                 Create Report
               </Button>
@@ -135,7 +135,7 @@ export default function Home() {
                   <p className="text-muted-foreground mb-4">
                     You haven't created any reports yet. Start by reporting a lost or found dog.
                   </p>
-                  <Button onClick={() => setLocation("/report")} data-testid="button-create-first-report">
+                  <Button onClick={() => navigate("/report")} data-testid="button-create-first-report">
                     Create Your First Report
                   </Button>
                 </CardContent>

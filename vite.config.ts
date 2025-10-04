@@ -21,6 +21,8 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      "use-sync-external-store/shim": path.resolve(import.meta.dirname, "client", "src", "polyfills", "use-sync-external-store-shim.js"),
+      "use-sync-external-store/shim/index.js": path.resolve(import.meta.dirname, "client", "src", "polyfills", "use-sync-external-store-shim.js"),
     },
   },
   root: path.resolve(import.meta.dirname, "client"),
@@ -30,6 +32,16 @@ export default defineConfig({
   },
   optimizeDeps: {
     noDiscovery: true,
+    exclude: [
+      "use-sync-external-store/shim",
+      "use-sync-external-store"
+    ],
+  },
+  define: {
+    global: 'globalThis',
+  },
+  ssr: {
+    noExternal: ['use-sync-external-store'],
   },
   server: {
     host: "0.0.0.0",

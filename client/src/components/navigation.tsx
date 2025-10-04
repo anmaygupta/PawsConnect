@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,7 +12,7 @@ import { User, LogOut, PlusCircle, Search, PawPrint } from "lucide-react";
 
 export default function Navigation() {
   const { user, isAuthenticated } = useAuth();
-  const [location] = useLocation();
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -31,7 +31,7 @@ export default function Navigation() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/">
+          <Link to="/">
             <div className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
               <PawPrint className="h-8 w-8 text-primary mr-3 fill-current" />
               <span className="text-xl font-bold text-foreground">Paw Finder</span>
@@ -41,32 +41,32 @@ export default function Navigation() {
           <nav className="hidden md:flex items-center space-x-6">
             {isAuthenticated && (
               <>
-                <Link href="/">
+                <Link to="/">
                   <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
-                    location === "/" ? "text-foreground" : "text-muted-foreground"
+                    location.pathname === "/" ? "text-foreground" : "text-muted-foreground"
                   }`}>
                     Home
                   </span>
                 </Link>
-                <Link href="/search">
+                <Link to="/search">
                   <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
-                    location.startsWith("/search") ? "text-foreground" : "text-muted-foreground"
+                    location.pathname.startsWith("/search") ? "text-foreground" : "text-muted-foreground"
                   }`}>
                     Search
                   </span>
                 </Link>
-                <Link href="/report">
+                <Link to="/report">
                   <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
-                    location === "/report" ? "text-foreground" : "text-muted-foreground"
+                    location.pathname === "/report" ? "text-foreground" : "text-muted-foreground"
                   }`}>
                     Report
                   </span>
                 </Link>
               </>
             )}
-            <Link href="/stories">
+            <Link to="/stories">
               <span className={`text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
-                location === "/stories" ? "text-foreground" : "text-muted-foreground"
+                location.pathname === "/stories" ? "text-foreground" : "text-muted-foreground"
               }`}>
                 <PawPrint className="h-4 w-4 text-primary mr-1 inline fill-current" />
                 Stories
@@ -79,13 +79,13 @@ export default function Navigation() {
               <>
                 {/* Quick Action Buttons */}
                 <div className="hidden sm:flex items-center space-x-2">
-                  <Link href="/search">
+                  <Link to="/search">
                     <Button variant="outline" size="sm" data-testid="button-nav-search">
                       <Search className="h-4 w-4 mr-2" />
                       Search
                     </Button>
                   </Link>
-                  <Link href="/report">
+                  <Link to="/report">
                     <Button size="sm" data-testid="button-nav-report">
                       <PlusCircle className="h-4 w-4 mr-2" />
                       Report

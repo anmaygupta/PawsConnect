@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, AlertTriangle, CheckCircle, MapPin } from "lucide-react";
@@ -8,7 +8,7 @@ import { lookupCity, formatConfirmation } from "@/lib/zipCodeLookup";
 export default function HeroSection() {
   const [zipCode, setZipCode] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   const handleSearch = () => {
     if (zipCode.trim() && zipCode.length >= 5) {
@@ -17,7 +17,7 @@ export default function HeroSection() {
   };
 
   const handleConfirm = () => {
-    setLocation(`/search/${zipCode.trim()}`);
+    navigate(`/search/${zipCode.trim()}`);
   };
 
   const handleCancel = () => {

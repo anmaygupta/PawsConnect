@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export default function ReportForm() {
   const [reportType, setReportType] = useState<'lost' | 'found'>('lost');
   const [images, setImages] = useState<File[]>([]);
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const form = useForm<ReportFormData>({
@@ -103,7 +103,7 @@ export default function ReportForm() {
         title: "Report Submitted Successfully",
         description: `Your ${reportType} dog report has been created and is now visible to the community.`,
       });
-      setLocation('/');
+      navigate('/');
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -391,7 +391,7 @@ export default function ReportForm() {
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => setLocation('/')}
+              onClick={() => navigate('/')}
               data-testid="button-cancel"
             >
               Cancel

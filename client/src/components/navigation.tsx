@@ -98,9 +98,14 @@ export default function Navigation() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={(user as any)?.profileImageUrl || undefined} alt={(user as any)?.firstName || "User"} />
+                        <AvatarImage 
+                          src={(user as any)?.profileImageUrl || undefined} 
+                          alt={(user as any)?.firstName || "User"} 
+                        />
                         <AvatarFallback>
-                          {(user as any)?.firstName?.[0] || (user as any)?.email?.[0] || <User className="h-4 w-4" />}
+                          {((user as any)?.firstName?.[0]?.toUpperCase()) || 
+                           ((user as any)?.email?.[0]?.toUpperCase()) || 
+                           <User className="h-4 w-4" />}
                         </AvatarFallback>
                       </Avatar>
                     </Button>

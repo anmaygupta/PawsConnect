@@ -107,6 +107,23 @@ export async function setupAuth(app: Express) {
   });
 }
 
+// Helper function to get user ID from either Google OAuth or Replit Auth
+export function getUserId(req: any): string | undefined {
+  if (!req.user) return undefined;
+  
+  // Google OAuth format: { id, email, firstName, ... }
+  if (req.user.id && !req.user.claims) {
+    return req.user.id;
+  }
+  
+  // Replit Auth format: { claims: { sub, ... }, ... }
+  if (req.user.claims?.sub) {
+    return req.user.claims.sub;
+  }
+  
+  return undefined;
+}
+
 export const isAuthenticated: RequestHandler = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();

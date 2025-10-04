@@ -5,7 +5,7 @@ import path from "path";
 import rateLimit from "express-rate-limit";
 import sanitizeHtml from "sanitize-html";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./auth";
+import { setupAuth, isAuthenticated, getUserId } from "./auth";
 import { upload } from "./middleware/upload";
 import { EmailService } from "./services/emailService";
 import { insertDogReportSchema, insertStorySchema, insertStoryCommentSchema } from "@shared/schema";
@@ -92,7 +92,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/reports', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
       const reports = await storage.getUserDogReports(userId);
       res.json(reports);
     } catch (error) {
@@ -103,7 +106,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/reports', reportRateLimit, isAuthenticated, upload.array('images', 10), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -218,7 +224,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { status } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
 
       // Validate status value
       const validStatuses = ['active', 'resolved', 'closed'];
@@ -259,7 +268,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/stories', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
       const storyData = insertStorySchema.parse(req.body);
       
       const story = await storage.createStory(storyData, userId);
@@ -279,7 +291,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stories/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = req.params.id;
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
       
       const result = await storage.toggleStoryLike(storyId, userId);
       res.json(result);
@@ -292,7 +307,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stories/:id/comments', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = req.params.id;
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
       const commentData = insertStoryCommentSchema.parse({
         ...req.body,
         storyId

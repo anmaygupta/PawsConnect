@@ -1,0 +1,101 @@
+# Overview
+
+This is a modern web application called "Paw Finder" designed to help reunite lost dogs with their families. The platform allows users to report lost or found dogs, search for reports by location, and facilitate communication between pet owners and finders. Built with a full-stack TypeScript architecture using React for the frontend and Express.js for the backend.
+
+# User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+# System Architecture
+
+## Frontend Architecture
+- **Framework**: React 18 with TypeScript using Vite as the build tool
+- **UI Library**: Shadcn/ui components built on top of Radix UI primitives
+- **Styling**: Tailwind CSS with custom CSS variables for theming
+- **State Management**: TanStack Query (React Query) for server state management
+- **Routing**: Wouter for lightweight client-side routing
+- **Forms**: React Hook Form with Zod validation for type-safe form handling
+- **File Structure**: Component-based architecture with shared utilities and custom hooks
+
+## Backend Architecture
+- **Runtime**: Node.js with Express.js framework
+- **Language**: TypeScript with ESM modules
+- **Database ORM**: Drizzle ORM for type-safe database operations
+- **Authentication**: Replit Auth integration with OpenID Connect
+- **Session Management**: Express sessions with PostgreSQL session store
+- **File Uploads**: Multer middleware for image handling with local storage
+- **Email Service**: Nodemailer for automated notifications
+
+## Database Design
+- **Database**: PostgreSQL (configured for Neon serverless)
+- **Key Tables**:
+  - `users` - User authentication and profile data
+  - `dogReports` - Lost and found dog reports with detailed metadata
+  - `dogReportImages` - Associated images for each report
+  - `sessions` - Session storage for authentication
+  - `emailNotifications` - Email notification tracking
+- **Schema Management**: Drizzle Kit for migrations and schema changes
+
+## Authentication & Authorization
+- **Provider**: Replit Auth with OIDC (OpenID Connect) flow
+- **Session Storage**: PostgreSQL-backed sessions with configurable TTL
+- **Security**: HTTP-only cookies, CSRF protection, secure cookie settings
+- **Authorization**: Route-level protection with middleware-based authentication checks
+
+## File Management
+- **Image Storage**: Local filesystem storage with organized directory structure
+- **Upload Handling**: Multer with file type validation and size limits (10MB max)
+- **Image Serving**: Static file serving through Express for uploaded images
+- **Validation**: MIME type checking to ensure only images are uploaded
+
+## API Design
+- **Architecture**: RESTful API with JSON responses
+- **Error Handling**: Centralized error handling with consistent response formats
+- **Logging**: Request/response logging with performance metrics
+- **Data Validation**: Zod schemas for request/response validation
+- **CORS**: Configured for cross-origin requests with credentials support
+
+## Development & Deployment
+- **Build System**: Vite for frontend bundling, esbuild for backend compilation
+- **Development**: Hot module replacement (HMR) with Vite dev server
+- **Environment**: Environment variable based configuration
+- **Scripts**: Unified package.json scripts for development, build, and deployment
+
+# External Dependencies
+
+## Core Framework Dependencies
+- **@neondatabase/serverless**: PostgreSQL serverless driver for database connectivity
+- **drizzle-orm**: Type-safe ORM with PostgreSQL adapter
+- **express**: Web framework for REST API and server-side routing
+- **react** & **@vitejs/plugin-react**: Frontend framework with Vite integration
+
+## Authentication & Security
+- **openid-client**: OpenID Connect client implementation for Replit Auth
+- **passport**: Authentication middleware with strategy-based auth
+- **connect-pg-simple**: PostgreSQL session store for Express sessions
+
+## UI & Styling
+- **@radix-ui/react-***: Comprehensive set of accessible UI primitives
+- **tailwindcss**: Utility-first CSS framework with custom theme
+- **class-variance-authority**: Utility for creating variant-based component styles
+- **lucide-react**: Icon library for consistent iconography
+
+## Form Handling & Validation
+- **react-hook-form**: Performant forms library with minimal re-renders
+- **@hookform/resolvers**: Validation resolvers for React Hook Form
+- **zod**: Schema validation library for type-safe data validation
+- **drizzle-zod**: Integration between Drizzle ORM and Zod validation
+
+## Data Fetching & State Management
+- **@tanstack/react-query**: Server state management with caching and background updates
+- **wouter**: Lightweight routing library for client-side navigation
+
+## File Upload & Email Services
+- **multer**: Multipart/form-data handling for file uploads
+- **nodemailer**: Email sending functionality for notifications
+- **@types/multer** & **@types/nodemailer**: TypeScript definitions
+
+## Development Tools
+- **typescript**: Static type checking and enhanced developer experience
+- **vite**: Fast build tool with HMR and optimized production builds
+- **eslint** & **prettier**: Code quality and formatting tools (implied by structure)

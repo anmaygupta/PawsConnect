@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, PlusCircle, Search } from "lucide-react";
+import { User, LogOut, PlusCircle, Search, PawPrint } from "lucide-react";
 import PawLogo from "@/components/paw-logo";
 
 export default function Navigation() {
@@ -29,7 +29,7 @@ export default function Navigation() {
         <div className="flex h-16 items-center justify-between">
           <Link href="/">
             <div className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
-              <PawLogo className="text-primary mr-3" size={32} />
+              <PawPrint className="h-8 w-8 text-primary mr-3" />
               <span className="text-xl font-bold text-foreground">Paw</span>
               <PawLogo className="text-primary mx-2" size={24} />
               <span className="text-xl font-bold text-foreground">Finder</span>

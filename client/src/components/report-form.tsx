@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
@@ -59,6 +60,8 @@ type ReportFormData = z.infer<typeof reportSchema>;
 export default function ReportForm() {
   const [reportType, setReportType] = useState<'lost' | 'found'>('lost');
   const [images, setImages] = useState<File[]>([]);
+  const [nameUnknown, setNameUnknown] = useState(false);
+  const [ageUnknown, setAgeUnknown] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -155,6 +158,11 @@ export default function ReportForm() {
     const newType = value as 'lost' | 'found';
     setReportType(newType);
     form.setValue('type', newType);
+    
+    if (newType === 'lost') {
+      setNameUnknown(false);
+      setAgeUnknown(false);
+    }
   };
 
   return (
@@ -205,7 +213,29 @@ export default function ReportForm() {
                   {...form.register('petName')}
                   placeholder="Enter pet's name"
                   data-testid="input-pet-name"
+                  disabled={nameUnknown}
+                  value={nameUnknown ? 'Unknown' : undefined}
                 />
+                {reportType === 'found' && (
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Checkbox
+                      id="nameUnknown"
+                      checked={nameUnknown}
+                      onCheckedChange={(checked) => {
+                        setNameUnknown(checked as boolean);
+                        if (checked) {
+                          form.setValue('petName', 'Unknown');
+                        } else {
+                          form.setValue('petName', '');
+                        }
+                      }}
+                      data-testid="checkbox-name-unknown"
+                    />
+                    <Label htmlFor="nameUnknown" className="text-sm font-normal cursor-pointer">
+                      Name Unknown
+                    </Label>
+                  </div>
+                )}
               </div>
               <div>
                 <Label htmlFor="breed">Breed *</Label>
@@ -243,7 +273,29 @@ export default function ReportForm() {
                   {...form.register('age')}
                   placeholder="e.g., 3 years"
                   data-testid="input-age"
+                  disabled={ageUnknown}
+                  value={ageUnknown ? 'Unknown' : undefined}
                 />
+                {reportType === 'found' && (
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Checkbox
+                      id="ageUnknown"
+                      checked={ageUnknown}
+                      onCheckedChange={(checked) => {
+                        setAgeUnknown(checked as boolean);
+                        if (checked) {
+                          form.setValue('age', 'Unknown');
+                        } else {
+                          form.setValue('age', '');
+                        }
+                      }}
+                      data-testid="checkbox-age-unknown"
+                    />
+                    <Label htmlFor="ageUnknown" className="text-sm font-normal cursor-pointer">
+                      Age Unknown
+                    </Label>
+                  </div>
+                )}
                 {form.formState.errors.age && (
                   <p className="text-sm text-destructive mt-1">{form.formState.errors.age.message}</p>
                 )}

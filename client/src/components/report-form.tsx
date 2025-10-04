@@ -475,11 +475,11 @@ export default function ReportForm() {
 
           {/* Photo Upload */}
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Photos (Up to 10)</h3>
+            <h3 className="text-lg font-semibold">Photos (Up to 100)</h3>
             <ImageUpload
               images={images}
               onChange={setImages}
-              maxImages={10}
+              maxImages={100}
               maxSizePerImage={10 * 1024 * 1024} // 10MB
             />
           </div>

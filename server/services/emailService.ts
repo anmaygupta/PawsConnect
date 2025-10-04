@@ -1,15 +1,17 @@
-import nodemailer from 'nodemailer';
+// import nodemailer from 'nodemailer'; // Replaced with secure Replit Mail integration
 import type { DogReport, User } from '@shared/schema';
+import { sendEmail } from '../utils/replitmail';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// Using secure Replit Mail integration instead of hardcoded SMTP
+// const transporter = nodemailer.createTransport({
+//   host: process.env.SMTP_HOST || 'smtp.gmail.com',
+//   port: parseInt(process.env.SMTP_PORT || '587'),
+//   secure: false,
+//   auth: {
+//     user: process.env.SMTP_USER,
+//     pass: process.env.SMTP_PASS,
+//   },
+// });
 
 export class EmailService {
   static async sendFoundDogNotification(
@@ -82,8 +84,7 @@ export class EmailService {
       </div>
     `;
 
-    await transporter.sendMail({
-      from: process.env.FROM_EMAIL || 'noreply@pawfinder.com',
+    await sendEmail({
       to: lostDogReport.contactEmail,
       subject,
       html: htmlContent,
@@ -140,8 +141,7 @@ export class EmailService {
       </div>
     `;
 
-    await transporter.sendMail({
-      from: process.env.FROM_EMAIL || 'noreply@pawfinder.com',
+    await sendEmail({
       to: report.contactEmail,
       subject,
       html: htmlContent,

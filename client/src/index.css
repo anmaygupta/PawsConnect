@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 89.02%);
+  --background: hsl(0deg 0% 100%);
   --foreground: hsl(31.09, 100%, 51.57%);
   --card: hsl(196.13, 75%, 51.37%);
   --card-foreground: hsl(0, 0%, 96.08%);
@@ -36,9 +36,9 @@
   --sidebar-accent-foreground: hsl(221.2 83.2% 53.3%);
   --sidebar-border: hsl(214.3 31.8% 91.4%);
   --sidebar-ring: hsl(221.2 83.2% 53.3%);
-  --font-sans: 'Roboto', sans-serif;
-  --font-serif: 'Inter', sans-serif;
-  --font-mono: Menlo, monospace;
+  --font-sans: Roboto;
+  --font-serif: Inter;
+  --font-mono: Architects Daughter;
   --radius: 0.75rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(221.2 83.2% 53.3% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(221.2 83.2% 53.3% / 0.00);

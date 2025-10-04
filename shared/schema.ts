@@ -36,14 +36,15 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Dog reports table
+// Pet reports table (cats and dogs)
 export const dogReports = pgTable("dog_reports", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
   type: varchar("type").notNull(), // 'lost' or 'found'
   
-  // Dog information
-  dogName: varchar("dog_name"),
+  // Animal information
+  animalType: varchar("animal_type").notNull(), // 'dog' or 'cat'
+  petName: varchar("pet_name"),
   breed: varchar("breed").notNull(),
   size: varchar("size").notNull(), // 'small', 'medium', 'large', 'extra-large'
   age: varchar("age").notNull(),
@@ -141,7 +142,8 @@ export const insertDogReportSchema = createInsertSchema(dogReports).omit({
     .min(5, "ZIP code is required"),
   
   // Enhanced text field validation with security checks
-  dogName: z.string().max(100, "Dog name too long").optional(),
+  animalType: z.enum(['dog', 'cat'], { required_error: "Animal type is required" }),
+  petName: z.string().max(100, "Pet name too long").optional(),
   breed: z.string().min(1, "Breed is required").max(100, "Breed name too long"),
   age: z.string().min(1, "Age is required").max(50, "Age description too long"),
   primaryColor: z.string().min(1, "Primary color is required").max(50, "Color description too long"),

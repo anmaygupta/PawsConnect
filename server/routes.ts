@@ -139,7 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         // Core text fields
         description: sanitizeHtml(req.body.description || '', sanitizeOptions),
-        dogName: req.body.dogName ? sanitizeHtml(req.body.dogName, sanitizeOptions) : req.body.dogName,
+        petName: req.body.petName ? sanitizeHtml(req.body.petName, sanitizeOptions) : req.body.petName,
         breed: sanitizeHtml(req.body.breed || '', sanitizeOptions),
         age: sanitizeHtml(req.body.age || '', sanitizeOptions),
         primaryColor: sanitizeHtml(req.body.primaryColor || '', sanitizeOptions),

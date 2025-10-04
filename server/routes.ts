@@ -122,6 +122,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid form submission detected" });
       }
 
+      // Validate total file size (max 200MB total to prevent resource exhaustion)
+      if (req.files && Array.isArray(req.files)) {
+        const totalFileSize = req.files.reduce((sum: number, file: Express.Multer.File) => sum + file.size, 0);
+        const maxTotalSize = 200 * 1024 * 1024; // 200MB
+        if (totalFileSize > maxTotalSize) {
+          // Clean up uploaded files since we're rejecting the request
+          const fs = await import('fs/promises');
+          for (const file of req.files) {
+            try {
+              await fs.unlink(file.path);
+            } catch (unlinkError) {
+              console.error(`Failed to delete file ${file.path}:`, unlinkError);
+            }
+          }
+          return res.status(400).json({ 
+            message: `Total file size (${(totalFileSize / 1024 / 1024).toFixed(2)}MB) exceeds the maximum allowed (200MB). Please reduce the number or size of images.` 
+          });
+        }
+      }
+
       // Sanitize text inputs to prevent XSS
       const sanitizeOptions = {
         allowedTags: [], // No HTML tags allowed

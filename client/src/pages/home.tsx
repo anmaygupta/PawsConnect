@@ -51,8 +51,11 @@ export default function Home() {
       <section className="py-12 bg-muted/50">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Welcome to Paw Finder
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center justify-center">
+              Welcome to 
+              <span className="ml-2">Paw</span>
+              <i className="fas fa-paw text-primary mx-2"></i>
+              <span>Finder</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
               Help reunite lost dogs with their families or find homes for found pets

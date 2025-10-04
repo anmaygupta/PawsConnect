@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import express from "express";
 import path from "path";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { upload } from "./middleware/upload";
 import { EmailService } from "./services/emailService";
 import { insertDogReportSchema, insertStorySchema, insertStoryCommentSchema } from "@shared/schema";

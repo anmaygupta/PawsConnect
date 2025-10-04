@@ -148,7 +148,7 @@ export default function Home() {
                       {report.images.length > 0 ? (
                         <img 
                           src={report.images[0].imageUrl} 
-                          alt={report.dogName || 'Dog'}
+                          alt={report.petName || 'Pet'}
                           className="w-full h-48 object-cover rounded-t-lg"
                         />
                       ) : (
@@ -180,8 +180,8 @@ export default function Home() {
                       </div>
                     </div>
                     <CardContent className="p-4">
-                      <h3 className="font-semibold text-lg mb-2" data-testid={`text-dog-name-${report.id}`}>
-                        {report.dogName || 'Unnamed Dog'}
+                      <h3 className="font-semibold text-lg mb-2" data-testid={`text-pet-name-${report.id}`}>
+                        {report.petName || 'Unnamed Pet'}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-2">
                         {report.breed} • {report.gender} • {report.age}

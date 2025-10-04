@@ -114,7 +114,7 @@ export default function HeroSection() {
               data-testid="button-report-lost"
             >
               <AlertTriangle className="h-5 w-5 mr-2" />
-              Report Lost Dog
+              Report Lost Pet
             </Button>
             <Button 
               onClick={handleReportFound}
@@ -122,7 +122,7 @@ export default function HeroSection() {
               data-testid="button-report-found"
             >
               <CheckCircle className="h-5 w-5 mr-2" />
-              Report Found Dog
+              Report Found Pet
             </Button>
           </div>
         </div>

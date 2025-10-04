@@ -183,22 +183,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the request if email fails
       }
 
-      // Check for potential matches if this is a found dog report
+      // Check for potential matches if this is a found pet report
       if (report.type === 'found') {
         try {
-          const lostDogs = await storage.getDogReportsByZipCode(report.zipCode);
-          const potentialMatches = lostDogs.filter(lostDog => 
-            lostDog.type === 'lost' && 
-            lostDog.breed.toLowerCase().includes(report.breed.toLowerCase()) &&
-            lostDog.status === 'active'
+          const lostPets = await storage.getDogReportsByZipCode(report.zipCode);
+          const potentialMatches = lostPets.filter(lostPet => 
+            lostPet.type === 'lost' && 
+            lostPet.animalType === report.animalType && // Match same animal type
+            lostPet.breed.toLowerCase().includes(report.breed.toLowerCase()) &&
+            lostPet.status === 'active'
           );
 
-          // Send notifications to owners of potentially matching lost dogs
-          for (const lostDog of potentialMatches) {
+          // Send notifications to owners of potentially matching lost pets
+          for (const lostPet of potentialMatches) {
             try {
-              const owner = await storage.getUser(lostDog.userId);
+              const owner = await storage.getUser(lostPet.userId);
               if (owner) {
-                await EmailService.sendFoundDogNotification(lostDog, report, owner, user);
+                await EmailService.sendFoundDogNotification(lostPet, report, owner, user);
               }
             } catch (notificationError) {
               console.error("Failed to send match notification:", notificationError);

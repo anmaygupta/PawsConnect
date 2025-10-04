@@ -161,7 +161,7 @@ export default function ReportForm() {
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
-          Report a {reportType === 'lost' ? 'Lost' : 'Found'} Dog
+          Report a {reportType === 'lost' ? 'Lost' : 'Found'} Pet
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -169,11 +169,11 @@ export default function ReportForm() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="lost" className="flex items-center gap-2" data-testid="tab-lost">
               <AlertTriangle className="h-4 w-4" />
-              Lost Dog
+              Lost Pet
             </TabsTrigger>
             <TabsTrigger value="found" className="flex items-center gap-2" data-testid="tab-found">
               <CheckCircle className="h-4 w-4" />
-              Found Dog
+              Found Pet
             </TabsTrigger>
           </TabsList>
         </Tabs>

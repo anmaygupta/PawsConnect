@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Search, AlertTriangle, CheckCircle, MapPin } from "lucide-react";
 import { lookupCity, formatConfirmation } from "@/lib/zipCodeLookup";
 
@@ -59,9 +60,12 @@ export default function HeroSection() {
           </p>
           
           <div className="glass-effect rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold mb-4">Enter your zip code to see local reports</h3>
+            <Label htmlFor="hero-zip-code" className="text-lg font-semibold mb-4 block">
+              Enter your zip code to see local reports
+            </Label>
             <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <Input
+                id="hero-zip-code"
                 type="text"
                 placeholder="Enter ZIP code"
                 value={zipCode}
@@ -73,6 +77,7 @@ export default function HeroSection() {
                 className="flex-1 text-foreground bg-white/90 border-white/20"
                 data-testid="input-hero-zip-code"
                 maxLength={5}
+                aria-label="ZIP code"
               />
               {!showConfirmation ? (
                 <Button 

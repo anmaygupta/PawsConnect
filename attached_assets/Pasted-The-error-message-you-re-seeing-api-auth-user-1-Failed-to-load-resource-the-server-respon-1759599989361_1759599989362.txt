@@ -1,0 +1,61 @@
+The error message you're seeing:
+
+```
+/api/auth/user:1 Failed to load resource: the server responded with a status of 401 ()
+```
+
+is a **401 Unauthorized** error. Here's what it means and how to fix it:
+
+---
+
+### ⚠️ What the Error Means
+
+- **401 status code**: This indicates that the request to `/api/auth/user` was made without proper authentication.
+- **Failed to load resource**: The browser tried to fetch user data from the server but was denied access.
+
+---
+
+### 🧩 What Could Have Caused It
+
+This typically happens when:
+- The user is **not signed in**, and the frontend tries to fetch user data prematurely.
+- The **authentication token is missing, expired, or invalid**.
+- There's a **misconfiguration** in how the frontend sends credentials (e.g., missing headers or cookies).
+- The backend route `/api/auth/user` is **protected**, but the frontend isn't checking if the user is authenticated before calling it.
+
+---
+
+### ✅ How to Fix It
+
+Here are a few steps to resolve the issue:
+
+1. **Ensure the user is signed in before calling `/api/auth/user`**
+   - Delay the API call until after authentication is confirmed.
+   - Use a conditional check like:
+     ```js
+     if (userIsAuthenticated) {
+       fetch('/api/auth/user');
+     }
+     ```
+
+2. **Verify token or session handling**
+   - If using cookies or headers for auth, make sure they’re included in the request.
+   - Example with `fetch`:
+     ```js
+     fetch('/api/auth/user', {
+       credentials: 'include'
+     });
+     ```
+
+3. **Check backend authentication logic**
+   - Confirm that the backend correctly validates tokens or sessions.
+   - Make sure the `/api/auth/user` route is accessible only to authenticated users.
+
+4. **Inspect auth provider setup**
+   - If you're using something like Firebase, Auth0, or a custom OAuth flow, ensure the token is being passed correctly and hasn’t expired.
+
+---
+
+If you're using Google Sign-In (as the page suggests), make sure the sign-in flow completes successfully and the token is stored and sent with requests. You might also want to log the token and inspect the request headers in DevTools to confirm it's being sent.
+
+Want help debugging the frontend code or checking the backend route logic? Just drop it in here and I’ll walk through it with you.

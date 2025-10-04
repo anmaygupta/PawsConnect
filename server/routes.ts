@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import express from "express";
 import path from "path";
 import rateLimit from "express-rate-limit";
+import sanitizeHtml from "sanitize-html";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { upload } from "./middleware/upload";
@@ -124,9 +125,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid form submission detected" });
       }
 
-      // Validate request body
-      const reportData = insertDogReportSchema.parse({
+      // Sanitize text inputs to prevent XSS
+      const sanitizeOptions = {
+        allowedTags: [], // No HTML tags allowed
+        allowedAttributes: {},
+        textFilter: function(text: string) {
+          // Additional cleaning
+          return text.trim();
+        }
+      };
+
+      const sanitizedBody = {
         ...req.body,
+        // Core text fields
+        description: sanitizeHtml(req.body.description || '', sanitizeOptions),
+        dogName: req.body.dogName ? sanitizeHtml(req.body.dogName, sanitizeOptions) : req.body.dogName,
+        breed: sanitizeHtml(req.body.breed || '', sanitizeOptions),
+        age: sanitizeHtml(req.body.age || '', sanitizeOptions),
+        primaryColor: sanitizeHtml(req.body.primaryColor || '', sanitizeOptions),
+        lastSeenLocation: sanitizeHtml(req.body.lastSeenLocation || '', sanitizeOptions),
+        
+        // Contact and location fields
+        contactName: sanitizeHtml(req.body.contactName || '', sanitizeOptions),
+        contactPhone: req.body.contactPhone ? sanitizeHtml(req.body.contactPhone, sanitizeOptions) : req.body.contactPhone,
+        contactEmail: req.body.contactEmail ? sanitizeHtml(req.body.contactEmail, sanitizeOptions) : req.body.contactEmail,
+        lastSeenTime: req.body.lastSeenTime ? sanitizeHtml(req.body.lastSeenTime, sanitizeOptions) : req.body.lastSeenTime,
+        zipCode: req.body.zipCode ? sanitizeHtml(req.body.zipCode, sanitizeOptions) : req.body.zipCode,
+      };
+
+      // Validate request body (after sanitization)
+      const reportData = insertDogReportSchema.parse({
+        ...sanitizedBody,
         lastSeenDate: new Date(req.body.lastSeenDate),
         rewardAmount: req.body.rewardAmount ? parseFloat(req.body.rewardAmount) : null,
       });

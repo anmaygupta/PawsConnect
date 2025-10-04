@@ -16,9 +16,10 @@ export default function Landing() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-paw text-xl text-primary"></i>
-                <span className="text-lg font-bold text-foreground">Paw Finder</span>
+              <div className="flex items-center">
+                <span className="text-lg font-bold text-foreground">Paw</span>
+                <i className="fas fa-paw text-xl text-primary mx-2"></i>
+                <span className="text-lg font-bold text-foreground">Finder</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Helping reunite lost dogs with their families through community support and technology.

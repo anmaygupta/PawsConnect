@@ -27,9 +27,10 @@ export default function Navigation() {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/">
-            <div className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer">
-              <i className="fas fa-paw text-2xl text-primary"></i>
-              <span className="text-xl font-bold text-foreground">Paw Finder</span>
+            <div className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
+              <span className="text-xl font-bold text-foreground">Paw</span>
+              <i className="fas fa-paw text-2xl text-primary mx-2"></i>
+              <span className="text-xl font-bold text-foreground">Finder</span>
             </div>
           </Link>
           

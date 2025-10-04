@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search as SearchIcon, MapPin } from "lucide-react";
+import { lookupCity, formatConfirmation } from "@/lib/zipCodeLookup";
 import type { DogReportWithImages } from "@shared/schema";
 
 export default function Search() {
@@ -14,6 +15,7 @@ export default function Search() {
   const initialZipCode = params.zipCode || "";
   const [zipCode, setZipCode] = useState(initialZipCode);
   const [searchZip, setSearchZip] = useState(initialZipCode);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const { data: reports = [], isLoading, error } = useQuery<DogReportWithImages[]>({
     queryKey: ['/api/reports/search', searchZip],
@@ -21,14 +23,30 @@ export default function Search() {
   });
 
   const handleSearch = () => {
-    if (zipCode.trim()) {
-      setSearchZip(zipCode.trim());
+    if (zipCode.trim() && zipCode.length >= 5) {
+      setShowConfirmation(true);
     }
+  };
+
+  const handleConfirm = () => {
+    setSearchZip(zipCode.trim());
+    setShowConfirmation(false);
+  };
+
+  const handleCancel = () => {
+    setShowConfirmation(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSearch();
+      if (showConfirmation) {
+        handleConfirm();
+      } else {
+        handleSearch();
+      }
+    }
+    if (e.key === 'Escape') {
+      handleCancel();
     }
   };
 
@@ -47,23 +65,52 @@ export default function Search() {
               Enter a ZIP code to see lost and found dog reports in that area
             </p>
             
-            <div className="max-w-md mx-auto flex gap-3">
-              <div className="flex-1 relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Enter ZIP code"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="pl-10"
-                  data-testid="input-zip-code"
-                />
+            <div className="max-w-md mx-auto">
+              <div className="flex gap-3 mb-4">
+                <div className="flex-1 relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Enter ZIP code"
+                    value={zipCode}
+                    onChange={(e) => {
+                      setZipCode(e.target.value);
+                      setShowConfirmation(false);
+                    }}
+                    onKeyPress={handleKeyPress}
+                    className="pl-10"
+                    data-testid="input-zip-code"
+                    maxLength={5}
+                  />
+                </div>
+                {!showConfirmation ? (
+                  <Button 
+                    onClick={handleSearch} 
+                    disabled={!zipCode.trim() || zipCode.length < 5} 
+                    data-testid="button-search"
+                  >
+                    <SearchIcon className="h-4 w-4 mr-2" />
+                    Search
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleConfirm}
+                      data-testid="button-search-confirm"
+                    >
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Confirm: {formatConfirmation(zipCode)}
+                    </Button>
+                    <Button 
+                      onClick={handleCancel}
+                      variant="outline"
+                      data-testid="button-search-cancel"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
               </div>
-              <Button onClick={handleSearch} disabled={!zipCode.trim()} data-testid="button-search">
-                <SearchIcon className="h-4 w-4 mr-2" />
-                Search
-              </Button>
             </div>
           </div>
         </div>

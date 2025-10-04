@@ -2,21 +2,38 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, AlertTriangle, CheckCircle } from "lucide-react";
+import { Search, AlertTriangle, CheckCircle, MapPin } from "lucide-react";
+import { lookupCity, formatConfirmation } from "@/lib/zipCodeLookup";
 
 export default function HeroSection() {
   const [zipCode, setZipCode] = useState("");
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [, setLocation] = useLocation();
 
   const handleSearch = () => {
-    if (zipCode.trim()) {
-      setLocation(`/search/${zipCode.trim()}`);
+    if (zipCode.trim() && zipCode.length >= 5) {
+      setShowConfirmation(true);
     }
+  };
+
+  const handleConfirm = () => {
+    setLocation(`/search/${zipCode.trim()}`);
+  };
+
+  const handleCancel = () => {
+    setShowConfirmation(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSearch();
+      if (showConfirmation) {
+        handleConfirm();
+      } else {
+        handleSearch();
+      }
+    }
+    if (e.key === 'Escape') {
+      handleCancel();
     }
   };
 
@@ -48,20 +65,45 @@ export default function HeroSection() {
                 type="text"
                 placeholder="Enter ZIP code"
                 value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
+                onChange={(e) => {
+                  setZipCode(e.target.value);
+                  setShowConfirmation(false);
+                }}
                 onKeyPress={handleKeyPress}
                 className="flex-1 text-foreground bg-white/90 border-white/20"
                 data-testid="input-hero-zip-code"
+                maxLength={5}
               />
-              <Button 
-                onClick={handleSearch}
-                className="bg-accent text-accent-foreground hover:bg-accent/90"
-                disabled={!zipCode.trim()}
-                data-testid="button-hero-search"
-              >
-                <Search className="h-4 w-4 mr-2" />
-                Search
-              </Button>
+              {!showConfirmation ? (
+                <Button 
+                  onClick={handleSearch}
+                  className="bg-accent text-accent-foreground hover:bg-accent/90"
+                  disabled={!zipCode.trim() || zipCode.length < 5}
+                  data-testid="button-hero-search"
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Search
+                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleConfirm}
+                    className="bg-accent text-accent-foreground hover:bg-accent/90"
+                    data-testid="button-hero-confirm"
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Confirm: {formatConfirmation(zipCode)}
+                  </Button>
+                  <Button 
+                    onClick={handleCancel}
+                    variant="outline"
+                    className="bg-white/90 text-foreground border-white/30 hover:bg-white"
+                    data-testid="button-hero-cancel"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           

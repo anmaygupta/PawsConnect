@@ -8,6 +8,7 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Search from "@/pages/search";
 import Report from "@/pages/report";
+import Donate from "@/pages/donate";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,13 +17,17 @@ function Router() {
   return (
     <Switch>
       {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
+        <>
+          <Route path="/" component={Landing} />
+          <Route path="/donate" component={Donate} />
+        </>
       ) : (
         <>
           <Route path="/" component={Home} />
           <Route path="/search" component={Search} />
           <Route path="/search/:zipCode" component={Search} />
           <Route path="/report" component={Report} />
+          <Route path="/donate" component={Donate} />
         </>
       )}
       <Route component={NotFound} />

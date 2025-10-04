@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { PlusCircle, Search, Heart } from "lucide-react";
+import PawLogo from "@/components/paw-logo";
 import type { DogReportWithImages } from "@shared/schema";
 
 export default function Home() {
@@ -54,7 +55,7 @@ export default function Home() {
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center justify-center">
               Welcome to 
               <span className="ml-2">Paw</span>
-              <i className="fas fa-paw text-primary mx-2"></i>
+              <PawLogo className="text-primary mx-2" size={40} />
               <span>Finder</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8">

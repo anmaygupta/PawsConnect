@@ -8,7 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, PlusCircle, Search } from "lucide-react";
+import { User, LogOut, PlusCircle, Search, Heart } from "lucide-react";
+import PawLogo from "@/components/paw-logo";
 
 export default function Navigation() {
   const { user, isAuthenticated } = useAuth();
@@ -28,37 +29,48 @@ export default function Navigation() {
         <div className="flex h-16 items-center justify-between">
           <Link href="/">
             <div className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
+              <PawLogo className="text-primary mr-3" size={32} />
               <span className="text-xl font-bold text-foreground">Paw</span>
-              <i className="fas fa-paw text-2xl text-primary mx-2"></i>
+              <PawLogo className="text-primary mx-2" size={24} />
               <span className="text-xl font-bold text-foreground">Finder</span>
             </div>
           </Link>
           
-          {isAuthenticated && (
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/">
-                <a className={`text-sm font-medium transition-colors hover:text-foreground ${
-                  location === "/" ? "text-foreground" : "text-muted-foreground"
-                }`}>
-                  Home
-                </a>
-              </Link>
-              <Link href="/search">
-                <a className={`text-sm font-medium transition-colors hover:text-foreground ${
-                  location.startsWith("/search") ? "text-foreground" : "text-muted-foreground"
-                }`}>
-                  Search
-                </a>
-              </Link>
-              <Link href="/report">
-                <a className={`text-sm font-medium transition-colors hover:text-foreground ${
-                  location === "/report" ? "text-foreground" : "text-muted-foreground"
-                }`}>
-                  Report
-                </a>
-              </Link>
-            </nav>
-          )}
+          <nav className="hidden md:flex items-center space-x-6">
+            {isAuthenticated && (
+              <>
+                <Link href="/">
+                  <a className={`text-sm font-medium transition-colors hover:text-foreground ${
+                    location === "/" ? "text-foreground" : "text-muted-foreground"
+                  }`}>
+                    Home
+                  </a>
+                </Link>
+                <Link href="/search">
+                  <a className={`text-sm font-medium transition-colors hover:text-foreground ${
+                    location.startsWith("/search") ? "text-foreground" : "text-muted-foreground"
+                  }`}>
+                    Search
+                  </a>
+                </Link>
+                <Link href="/report">
+                  <a className={`text-sm font-medium transition-colors hover:text-foreground ${
+                    location === "/report" ? "text-foreground" : "text-muted-foreground"
+                  }`}>
+                    Report
+                  </a>
+                </Link>
+              </>
+            )}
+            <Link href="/donate">
+              <a className={`text-sm font-medium transition-colors hover:text-foreground ${
+                location === "/donate" ? "text-foreground" : "text-muted-foreground"
+              }`}>
+                <Heart className="h-4 w-4 mr-1 inline text-red-500" />
+                Donate
+              </a>
+            </Link>
+          </nav>
           
           <div className="flex items-center space-x-3">
             {isAuthenticated ? (

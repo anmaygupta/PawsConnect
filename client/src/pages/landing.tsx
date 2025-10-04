@@ -2,6 +2,7 @@ import Navigation from "@/components/navigation";
 import HeroSection from "@/components/hero-section";
 import StatsSection from "@/components/stats-section";
 import RecentReports from "@/components/recent-reports";
+import PawLogo from "@/components/paw-logo";
 
 export default function Landing() {
   return (
@@ -18,7 +19,7 @@ export default function Landing() {
             <div className="space-y-4">
               <div className="flex items-center">
                 <span className="text-lg font-bold text-foreground">Paw</span>
-                <i className="fas fa-paw text-xl text-primary mx-2"></i>
+                <PawLogo className="text-primary mx-2" size={20} />
                 <span className="text-lg font-bold text-foreground">Finder</span>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -32,7 +33,7 @@ export default function Landing() {
                 <li><a href="#search" className="hover:text-foreground transition-colors">Search Dogs</a></li>
                 <li><a href="#report" className="hover:text-foreground transition-colors">Report Lost</a></li>
                 <li><a href="#report" className="hover:text-foreground transition-colors">Report Found</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Success Stories</a></li>
+                <li><a href="/donate" className="hover:text-foreground transition-colors">Donate</a></li>
               </ul>
             </div>
             

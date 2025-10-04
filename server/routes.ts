@@ -104,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/reports', reportRateLimit, isAuthenticated, upload.array('images', 100), async (req: any, res) => {
+  app.post('/api/reports', reportRateLimit, isAuthenticated, upload.array('images', 25), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {

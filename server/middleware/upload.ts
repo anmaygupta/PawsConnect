@@ -33,7 +33,7 @@ export const upload = multer({
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB per file limit
-    files: 100, // Maximum 100 files
+    files: 25, // Maximum 25 files
     fieldSize: 200 * 1024 * 1024 // 200MB total payload limit
   }
 });

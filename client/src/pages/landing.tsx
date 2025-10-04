@@ -2,7 +2,7 @@ import Navigation from "@/components/navigation";
 import HeroSection from "@/components/hero-section";
 import StatsSection from "@/components/stats-section";
 import RecentReports from "@/components/recent-reports";
-import PawLogo from "@/components/paw-logo";
+import { PawPrint } from "lucide-react";
 
 export default function Landing() {
   return (
@@ -19,7 +19,7 @@ export default function Landing() {
             <div className="space-y-4">
               <div className="flex items-center">
                 <span className="text-lg font-bold text-foreground">Paw</span>
-                <PawLogo className="text-primary mx-2" size={20} />
+                <PawPrint className="h-5 w-5 text-primary mx-2 fill-current" />
                 <span className="text-lg font-bold text-foreground">Finder</span>
               </div>
               <p className="text-sm text-muted-foreground">

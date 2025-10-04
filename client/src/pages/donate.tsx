@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { DollarSign, Users, Coffee, PawPrint } from "lucide-react";
-import PawLogo from "@/components/paw-logo";
 
 export default function Donate() {
   const { isAuthenticated } = useAuth();
@@ -54,7 +53,7 @@ export default function Donate() {
             <div className="flex items-center justify-center mb-4">
               <PawPrint className="h-12 w-12 text-primary mr-4 fill-current" />
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                Support Paw<PawLogo className="text-primary mx-2" size={40} />Finder
+                Support Paw<PawPrint className="h-10 w-10 text-primary mx-2 fill-current" />Finder
               </h1>
             </div>
             <p className="text-lg text-muted-foreground">

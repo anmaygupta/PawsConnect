@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut, PlusCircle, Search, PawPrint } from "lucide-react";
-import PawLogo from "@/components/paw-logo";
 
 export default function Navigation() {
   const { user, isAuthenticated } = useAuth();
@@ -31,7 +30,7 @@ export default function Navigation() {
             <div className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
               <PawPrint className="h-8 w-8 text-primary mr-3 fill-current" />
               <span className="text-xl font-bold text-foreground">Paw</span>
-              <PawLogo className="text-primary mx-2" size={24} />
+              <PawPrint className="h-6 w-6 text-primary mx-2 fill-current" />
               <span className="text-xl font-bold text-foreground">Finder</span>
             </div>
           </Link>

@@ -1,14 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs>
-    <linearGradient id="pawGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  <ellipse cx="50" cy="70" rx="20" ry="25" fill="url(#pawGradient)"/>
-  <ellipse cx="30" cy="40" rx="12" ry="15" fill="url(#pawGradient)"/>
-  <ellipse cx="50" cy="35" rx="12" ry="15" fill="url(#pawGradient)"/>
-  <ellipse cx="70" cy="40" rx="12" ry="15" fill="url(#pawGradient)"/>
-  <ellipse cx="25" cy="58" rx="10" ry="12" fill="url(#pawGradient)"/>
-  <ellipse cx="75" cy="58" rx="10" ry="12" fill="url(#pawGradient)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <path
+    d="M12 21C12 21 8.5 18 6 15C3.5 12 3 9 5 7C7 5 9 6 12 9C15 6 17 5 19 7C21 9 20.5 12 18 15C15.5 18 12 21 12 21Z"
+    fill="#3b82f6"
+  />
+  <circle cx="8" cy="6" r="2" fill="#3b82f6" />
+  <circle cx="16" cy="6" r="2" fill="#3b82f6" />
+  <circle cx="6" cy="10" r="1.5" fill="#3b82f6" />
+  <circle cx="18" cy="10" r="1.5" fill="#3b82f6" />
 </svg>

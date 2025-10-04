@@ -38,6 +38,17 @@ export default function Search() {
   const handleConfirm = () => {
     setSearchZip(zipCode.trim());
     setShowConfirmation(false);
+    
+    // Scroll to results section after a brief delay to allow state update
+    setTimeout(() => {
+      const resultsSection = document.getElementById('search-results');
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 100);
   };
 
   const handleCancel = () => {
@@ -124,7 +135,7 @@ export default function Search() {
       </section>
 
       {/* Search Results */}
-      <section className="py-12">
+      <section id="search-results" className="py-12">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-6xl mx-auto">
             {!searchZip ? (

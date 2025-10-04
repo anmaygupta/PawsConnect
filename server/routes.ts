@@ -220,6 +220,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status } = req.body;
       const userId = req.user.claims.sub;
 
+      // Validate status value
+      const validStatuses = ['active', 'resolved', 'closed'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          message: "Invalid status. Must be one of: active, resolved, closed" 
+        });
+      }
+
       // Verify the report belongs to the user
       const report = await storage.getDogReport(id);
       if (!report) {

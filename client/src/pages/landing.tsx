@@ -46,26 +46,14 @@ export default function Landing() {
             </div>
             
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Connect</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                  <i className="fab fa-facebook text-xl"></i>
-                </a>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                  <i className="fab fa-twitter text-xl"></i>
-                </a>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                  <i className="fab fa-instagram text-xl"></i>
-                </a>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
+              <p className="text-sm text-muted-foreground">
                 Emergency? Call local animal control or 911
               </p>
             </div>
           </div>
           
           <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-            © 2024 Paw Finder. All rights reserved. Made with ❤️ for pets and their families.
+            © 2025 Paw Finder. All rights reserved. Made with ❤️ for pets and their families.
           </div>
         </div>
       </footer>

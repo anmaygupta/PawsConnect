@@ -31,15 +31,39 @@ export default function Donate() {
     return parseFloat(customAmount) || 0;
   };
 
-  const handleDonate = () => {
+  const handleDonate = async () => {
     const amount = getCurrentAmount();
     if (amount < 1) {
       alert("Please enter a donation amount of at least $1");
       return;
     }
     
-    // This will be implemented once Stripe keys are provided
-    alert("Stripe payment integration will be added once API keys are provided!");
+    try {
+      // Create payment intent on server
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          amount: amount,
+          message: message 
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create payment intent');
+      }
+      
+      const { clientSecret } = await response.json();
+      
+      // Redirect to Stripe checkout
+      window.location.href = `/checkout?clientSecret=${clientSecret}&amount=${amount}`;
+      
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert("Payment setup failed. Please make sure Stripe API keys are configured.");
+    }
   };
 
   return (

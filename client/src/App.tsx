@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import Search from "@/pages/search";
 import Report from "@/pages/report";
 import Donate from "@/pages/donate";
+import Checkout from "@/pages/checkout";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
         <>
           <Route path="/" component={Landing} />
           <Route path="/donate" component={Donate} />
+          <Route path="/checkout" component={Checkout} />
         </>
       ) : (
         <>
@@ -28,6 +30,7 @@ function Router() {
           <Route path="/search/:zipCode" component={Search} />
           <Route path="/report" component={Report} />
           <Route path="/donate" component={Donate} />
+          <Route path="/checkout" component={Checkout} />
         </>
       )}
       <Route component={NotFound} />

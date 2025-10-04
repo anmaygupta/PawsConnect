@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/navigation";
 import DogCard from "@/components/dog-card";
@@ -12,6 +12,7 @@ import type { DogReportWithImages } from "@shared/schema";
 
 export default function Search() {
   const params = useParams();
+  const [, setLocation] = useLocation();
   const initialZipCode = params.zipCode || "";
   const [zipCode, setZipCode] = useState(initialZipCode);
   const [searchZip, setSearchZip] = useState(initialZipCode);
@@ -36,19 +37,9 @@ export default function Search() {
   };
 
   const handleConfirm = () => {
-    setSearchZip(zipCode.trim());
-    setShowConfirmation(false);
-    
-    // Scroll to results section after a brief delay to allow state update
-    setTimeout(() => {
-      const resultsSection = document.getElementById('search-results');
-      if (resultsSection) {
-        resultsSection.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
-    }, 100);
+    const trimmedZip = zipCode.trim();
+    // Navigate to the search results page with the ZIP code
+    setLocation(`/search/${trimmedZip}`);
   };
 
   const handleCancel = () => {

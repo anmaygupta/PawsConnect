@@ -15,7 +15,7 @@ This is a modern web application called "Paw Finder" (also called "PawsConnect")
 - **Enhanced Report Validation**: Contact info (phone/email) now mandatory for all pet reports; lost reports require name, breed, size, and age; found reports allow "Unknown" checkboxes for name, breed, and age
 - **Server-Side Validation**: Added comprehensive Zod schema validation with transform to default found report fields to "Unknown" and superRefine to enforce lost report requirements, preventing database errors
 - **Public Search Functionality**: Search pages (`/search` and `/search/:zipCode`) accessible to both authenticated and guest users
-- **Surrounding ZIP Code Suggestions**: Search results include clickable buttons for surrounding ZIP codes (±1-5 range) to help users expand search area
+- **Surrounding ZIP Code Suggestions**: Search results include clickable buttons for surrounding ZIP codes (±1-5 range) with city labels in format "94582: San Ramon" to help users expand search area
 - **Report Cards Display**: Comprehensive report card UI with pet images, badges for lost/found status, detailed pet information, and location/date details
 - **ZIP Code Helper Functions**: Added `getSurroundingZipCodes()` utility to calculate nearby ZIP codes for improved search discoverability
 

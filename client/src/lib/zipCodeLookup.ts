@@ -203,3 +203,28 @@ export function formatConfirmation(zipCode: string): string {
   }
   return `${zipCode}?`;
 }
+
+export function getSurroundingZipCodes(zipCode: string): string[] {
+  const zip = parseInt(zipCode, 10);
+  if (isNaN(zip) || zipCode.length !== 5) {
+    return [];
+  }
+
+  const surrounding: string[] = [];
+  
+  // Generate surrounding zip codes (±1 to ±5 range)
+  for (let offset = 1; offset <= 5; offset++) {
+    const lowerZip = zip - offset;
+    const upperZip = zip + offset;
+    
+    // Check valid 5-digit zip code range (00001-99999)
+    if (lowerZip >= 1 && lowerZip <= 99999) {
+      surrounding.push(lowerZip.toString().padStart(5, '0'));
+    }
+    if (upperZip >= 1 && upperZip <= 99999) {
+      surrounding.push(upperZip.toString().padStart(5, '0'));
+    }
+  }
+  
+  return surrounding;
+}

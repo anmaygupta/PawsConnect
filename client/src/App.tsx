@@ -16,18 +16,18 @@ function Router() {
 
   return (
     <Routes>
+      {/* Public routes - accessible to everyone */}
+      <Route path="/search" element={<Search />} />
+      <Route path="/search/:zipCode" element={<Search />} />
+      <Route path="/stories" element={<Stories />} />
+      
+      {/* Conditional routes based on auth */}
       {isLoading || !isAuthenticated ? (
-        <>
-          <Route path="/" element={<Landing />} />
-          <Route path="/stories" element={<Stories />} />
-        </>
+        <Route path="/" element={<Landing />} />
       ) : (
         <>
           <Route path="/" element={<Home />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/search/:zipCode" element={<Search />} />
           <Route path="/report" element={<Report />} />
-          <Route path="/stories" element={<Stories />} />
         </>
       )}
       <Route path="*" element={<NotFound />} />

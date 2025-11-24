@@ -22,6 +22,7 @@ export function getSession() {
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', // CSRF protection
       maxAge: sessionTtl,
     },
   });
@@ -78,11 +79,17 @@ export async function setupAuth(app: Express) {
   // Authentication routes - only setup Google routes if credentials are available
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     app.get("/api/auth/google",
-      passport.authenticate("google", { scope: ["profile", "email"] })
+      passport.authenticate("google", { 
+        scope: ["profile", "email"],
+        state: true // Enable OAuth state parameter for CSRF protection
+      })
     );
 
     app.get("/api/auth/google/callback",
-      passport.authenticate("google", { failureRedirect: "/" }),
+      passport.authenticate("google", { 
+        failureRedirect: "/",
+        state: true // Validate OAuth state parameter for CSRF protection
+      }),
       (req, res) => {
         // Successful authentication, redirect home
         res.redirect("/");

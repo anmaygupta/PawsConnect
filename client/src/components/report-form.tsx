@@ -22,9 +22,9 @@ const reportSchema = z.object({
   type: z.enum(['lost', 'found']),
   animalType: z.enum(['dog', 'cat'], { required_error: "Animal type is required" }),
   petName: z.string().max(100, "Pet name too long").optional(),
-  breed: z.string().min(1, "Breed is required").max(100, "Breed name too long"),
-  size: z.enum(['small', 'medium', 'large', 'extra-large']),
-  age: z.string().min(1, "Age is required").max(50, "Age description too long"),
+  breed: z.string().max(100, "Breed name too long").optional(),
+  size: z.enum(['small', 'medium', 'large', 'extra-large']).optional(),
+  age: z.string().max(50, "Age description too long").optional(),
   primaryColor: z.string().min(1, "Primary color is required").max(50, "Color description too long"),
   gender: z.enum(['male', 'female']),
   description: z.string()
@@ -44,15 +44,35 @@ const reportSchema = z.object({
     .max(100, "Name too long")
     .regex(/^[a-zA-Z\s\-'\.]+$/, "Name contains invalid characters"),
   contactPhone: z.string()
+    .min(1, "Phone number is required")
     .regex(/^(\+1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/, "Please enter a valid US phone number"),
   contactEmail: z.string()
+    .min(1, "Email address is required")
     .email("Valid email address is required")
     .max(254, "Email address too long"),
   rewardAmount: z.string()
     .regex(/^\d*\.?\d{0,2}$/, "Invalid reward amount format")
     .optional(),
-  // Anti-bot honeypot field (hidden from users)
   website: z.string().max(0, "Spam detected").optional(),
+}).refine((data) => {
+  if (data.type === 'lost') {
+    if (!data.petName || data.petName.trim() === '') {
+      return false;
+    }
+    if (!data.breed || data.breed.trim() === '' || data.breed === 'Unknown') {
+      return false;
+    }
+    if (!data.size) {
+      return false;
+    }
+    if (!data.age || data.age.trim() === '' || data.age === 'Unknown') {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "For lost pets, name, breed, size, and age are required",
+  path: ['type'],
 });
 
 type ReportFormData = z.infer<typeof reportSchema>;
@@ -61,6 +81,7 @@ export default function ReportForm() {
   const [reportType, setReportType] = useState<'lost' | 'found'>('lost');
   const [images, setImages] = useState<File[]>([]);
   const [nameUnknown, setNameUnknown] = useState(false);
+  const [breedUnknown, setBreedUnknown] = useState(false);
   const [ageUnknown, setAgeUnknown] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -161,6 +182,7 @@ export default function ReportForm() {
     
     if (newType === 'lost') {
       setNameUnknown(false);
+      setBreedUnknown(false);
       setAgeUnknown(false);
     }
   };
@@ -207,7 +229,7 @@ export default function ReportForm() {
                 )}
               </div>
               <div>
-                <Label htmlFor="petName">Pet's Name {reportType === 'found' && '(if known)'}</Label>
+                <Label htmlFor="petName">Pet's Name {reportType === 'lost' ? '*' : '(if known)'}</Label>
                 <Input
                   id="petName"
                   {...form.register('petName')}
@@ -238,19 +260,41 @@ export default function ReportForm() {
                 )}
               </div>
               <div>
-                <Label htmlFor="breed">Breed *</Label>
+                <Label htmlFor="breed">Breed {reportType === 'lost' ? '*' : '(if known)'}</Label>
                 <Input
                   id="breed"
                   {...form.register('breed')}
                   placeholder="e.g., Golden Retriever, Persian"
                   data-testid="input-breed"
+                  disabled={breedUnknown}
+                  value={breedUnknown ? 'Unknown' : undefined}
                 />
+                {reportType === 'found' && (
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Checkbox
+                      id="breedUnknown"
+                      checked={breedUnknown}
+                      onCheckedChange={(checked) => {
+                        setBreedUnknown(checked as boolean);
+                        if (checked) {
+                          form.setValue('breed', 'Unknown');
+                        } else {
+                          form.setValue('breed', '');
+                        }
+                      }}
+                      data-testid="checkbox-breed-unknown"
+                    />
+                    <Label htmlFor="breedUnknown" className="text-sm font-normal cursor-pointer">
+                      Breed Unknown
+                    </Label>
+                  </div>
+                )}
                 {form.formState.errors.breed && (
                   <p className="text-sm text-destructive mt-1">{form.formState.errors.breed.message}</p>
                 )}
               </div>
               <div>
-                <Label htmlFor="size">Size *</Label>
+                <Label htmlFor="size">Size {reportType === 'lost' ? '*' : ''}</Label>
                 <Select onValueChange={(value) => form.setValue('size', value as any)} defaultValue="medium">
                   <SelectTrigger data-testid="select-size">
                     <SelectValue placeholder="Select size" />
@@ -267,7 +311,7 @@ export default function ReportForm() {
                 )}
               </div>
               <div>
-                <Label htmlFor="age">Age *</Label>
+                <Label htmlFor="age">Age {reportType === 'lost' ? '*' : '(if known)'}</Label>
                 <Input
                   id="age"
                   {...form.register('age')}

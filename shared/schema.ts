@@ -268,6 +268,10 @@ export const insertStoryCommentSchema = createInsertSchema(storyComments).omit({
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// PublicUser type - excludes email for security (only display name shown publicly)
+export type PublicUser = Omit<User, 'email'>;
+
 export type InsertDogReport = z.infer<typeof insertDogReportSchema>;
 export type DogReport = typeof dogReports.$inferSelect;
 export type InsertDogReportImage = z.infer<typeof insertDogReportImageSchema>;
@@ -284,11 +288,11 @@ export type StoryComment = typeof storyComments.$inferSelect;
 // Extended types with relations
 export type DogReportWithImages = DogReport & {
   images: DogReportImage[];
-  user: User;
+  user: PublicUser;
 };
 
 export type StoryWithDetails = Story & {
-  user: User;
-  comments: (StoryComment & { user: User })[];
+  user: PublicUser;
+  comments: (StoryComment & { user: PublicUser })[];
   userReaction?: 'like' | 'love' | null;
 };

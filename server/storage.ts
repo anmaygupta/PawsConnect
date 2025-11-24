@@ -7,6 +7,7 @@ import {
   storyReactions,
   storyComments,
   type User,
+  type PublicUser,
   type UpsertUser,
   type DogReport,
   type InsertDogReport,
@@ -69,7 +70,7 @@ export interface IStorage {
   
   // Story comment operations
   addStoryComment(comment: InsertStoryComment, userId: string): Promise<StoryComment>;
-  getStoryComments(storyId: string): Promise<(StoryComment & { user: User })[]>;
+  getStoryComments(storyId: string): Promise<(StoryComment & { user: PublicUser })[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -128,8 +129,16 @@ export class DatabaseStorage implements IStorage {
     if (!report) return undefined;
 
     const images = await this.getReportImages(id);
+    // Select only public user fields (exclude email for privacy)
     const [user] = await db
-      .select()
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
       .from(users)
       .where(eq(users.id, report.userId));
 
@@ -159,8 +168,16 @@ export class DatabaseStorage implements IStorage {
     const reportsWithDetails = await Promise.all(
       reports.map(async (report) => {
         const images = await this.getReportImages(report.id);
+        // Select only public user fields (exclude email for privacy)
         const [user] = await db
-          .select()
+          .select({
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            profileImageUrl: users.profileImageUrl,
+            createdAt: users.createdAt,
+            updatedAt: users.updatedAt,
+          })
           .from(users)
           .where(eq(users.id, report.userId));
 
@@ -185,8 +202,16 @@ export class DatabaseStorage implements IStorage {
     const reportsWithDetails = await Promise.all(
       reports.map(async (report) => {
         const images = await this.getReportImages(report.id);
+        // Select only public user fields (exclude email for privacy)
         const [user] = await db
-          .select()
+          .select({
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            profileImageUrl: users.profileImageUrl,
+            createdAt: users.createdAt,
+            updatedAt: users.updatedAt,
+          })
           .from(users)
           .where(eq(users.id, report.userId));
 
@@ -219,8 +244,16 @@ export class DatabaseStorage implements IStorage {
     const reportsWithDetails = await Promise.all(
       reports.map(async (report) => {
         const images = await this.getReportImages(report.id);
+        // Select only public user fields (exclude email for privacy)
         const [user] = await db
-          .select()
+          .select({
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            profileImageUrl: users.profileImageUrl,
+            createdAt: users.createdAt,
+            updatedAt: users.updatedAt,
+          })
           .from(users)
           .where(eq(users.id, report.userId));
 
@@ -319,8 +352,16 @@ export class DatabaseStorage implements IStorage {
 
     const storiesWithDetails = await Promise.all(
       storiesData.map(async (story) => {
+        // Select only public user fields (exclude email for privacy)
         const [user] = await db
-          .select()
+          .select({
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            profileImageUrl: users.profileImageUrl,
+            createdAt: users.createdAt,
+            updatedAt: users.updatedAt,
+          })
           .from(users)
           .where(eq(users.id, story.userId));
 
@@ -345,8 +386,16 @@ export class DatabaseStorage implements IStorage {
     
     if (!story) return undefined;
 
+    // Select only public user fields (exclude email for privacy)
     const [user] = await db
-      .select()
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
       .from(users)
       .where(eq(users.id, story.userId));
 
@@ -522,7 +571,7 @@ export class DatabaseStorage implements IStorage {
     return createdComment;
   }
 
-  async getStoryComments(storyId: string): Promise<(StoryComment & { user: User })[]> {
+  async getStoryComments(storyId: string): Promise<(StoryComment & { user: PublicUser })[]> {
     const commentsData = await db
       .select()
       .from(storyComments)
@@ -531,8 +580,16 @@ export class DatabaseStorage implements IStorage {
 
     const commentsWithUsers = await Promise.all(
       commentsData.map(async (comment) => {
+        // Select only public user fields (exclude email for privacy)
         const [user] = await db
-          .select()
+          .select({
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            profileImageUrl: users.profileImageUrl,
+            createdAt: users.createdAt,
+            updatedAt: users.updatedAt,
+          })
           .from(users)
           .where(eq(users.id, comment.userId));
 

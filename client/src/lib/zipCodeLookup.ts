@@ -199,9 +199,9 @@ export function lookupCity(zipCode: string): string | null {
 export function formatConfirmation(zipCode: string): string {
   const city = lookupCity(zipCode);
   if (city) {
-    return `${city}?`;
+    return `${zipCode} (${city})`;
   }
-  return `${zipCode}?`;
+  return zipCode;
 }
 
 export function getSurroundingZipCodes(zipCode: string): string[] {

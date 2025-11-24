@@ -97,7 +97,7 @@ export default function HeroSection() {
                     data-testid="button-hero-confirm"
                   >
                     <MapPin className="h-4 w-4 mr-2" />
-                    Confirm: {formatConfirmation(zipCode)}
+                    Confirm ZIP: {formatConfirmation(zipCode)}
                   </Button>
                   <Button 
                     onClick={handleCancel}

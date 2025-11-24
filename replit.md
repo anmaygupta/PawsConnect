@@ -4,6 +4,11 @@ This is a modern web application called "Paw Finder" (also called "PawsConnect")
 
 # Recent Changes (November 24, 2025)
 
+- **Critical Security Enhancements**: Complete security audit and hardening implemented
+  - **Data Privacy**: User email addresses completely protected - only display names (firstName + lastName from Google) shown publicly on reports and stories
+  - **OAuth CSRF Protection**: Google OAuth flow secured with automatic state parameter generation and validation to prevent CSRF attacks
+  - **Session CSRF Protection**: Added `sameSite: 'lax'` cookie attribute to prevent cross-site request forgery on authenticated actions
+  - **PublicUser Type**: Created new type to exclude sensitive fields from public API responses
 - **Reward Field Enhancement**: Reward amount field now only visible for lost pet reports with disclaimer "(Transactions are not made through Paw Finder)"; reports display "(No reward if found)" when amount is $0 or not specified
 - **Success Stories Feature**: Added Facebook-style success stories page with 5-star rating system, like/love reactions with accurate count tracking, pagination (show 3 initially with "View More" button), and story submission form
 - **Story Reactions System**: Implemented dual reaction types (like 👍 and love ❤️) with separate likesCount and lovesCount tracking, proper toggle logic, and database constraints to prevent negative counts

@@ -147,8 +147,9 @@ export const insertDogReportSchema = createInsertSchema(dogReports).omit({
   // Enhanced text field validation with security checks
   animalType: z.enum(['dog', 'cat'], { required_error: "Animal type is required" }),
   petName: z.string().max(100, "Pet name too long").optional(),
-  breed: z.string().min(1, "Breed is required").max(100, "Breed name too long"),
-  age: z.string().min(1, "Age is required").max(50, "Age description too long"),
+  breed: z.string().max(100, "Breed name too long").optional(),
+  size: z.enum(['small', 'medium', 'large', 'extra-large'], { required_error: "Size is required" }),
+  age: z.string().max(50, "Age description too long").optional(),
   primaryColor: z.string().min(1, "Primary color is required").max(50, "Color description too long"),
   description: z.string()
     .min(10, "Description must be at least 10 characters")
@@ -158,14 +159,16 @@ export const insertDogReportSchema = createInsertSchema(dogReports).omit({
     .min(1, "Location is required")
     .max(200, "Location description too long"),
   
-  // Enhanced contact validation
+  // Enhanced contact validation - all required
   contactName: z.string()
     .min(1, "Your name is required")
     .max(100, "Name too long")
     .regex(/^[a-zA-Z\s\-'\.]+$/, "Name contains invalid characters"),
   contactPhone: z.string()
+    .min(1, "Phone number is required")
     .regex(/^(\+1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/, "Please enter a valid US phone number"),
   contactEmail: z.string()
+    .min(1, "Email address is required")
     .email("Valid email address is required")
     .max(254, "Email address too long"),
   
@@ -184,6 +187,45 @@ export const insertDogReportSchema = createInsertSchema(dogReports).omit({
   
   // Anti-bot honeypot field
   website: z.string().max(0, "Spam detected").optional(),
+}).transform((data) => {
+  // For found pets, ensure breed and age have "Unknown" if not provided
+  if (data.type === 'found') {
+    if (!data.breed || data.breed.trim() === '') {
+      data.breed = 'Unknown';
+    }
+    if (!data.age || data.age.trim() === '') {
+      data.age = 'Unknown';
+    }
+    if (!data.petName || data.petName.trim() === '') {
+      data.petName = 'Unknown';
+    }
+  }
+  return data;
+}).superRefine((data, ctx) => {
+  // For lost pets, enforce required fields that cannot be "Unknown"
+  if (data.type === 'lost') {
+    if (!data.petName || data.petName.trim() === '' || data.petName === 'Unknown') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Pet name is required for lost pet reports",
+        path: ['petName'],
+      });
+    }
+    if (!data.breed || data.breed.trim() === '' || data.breed === 'Unknown') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Breed is required for lost pet reports",
+        path: ['breed'],
+      });
+    }
+    if (!data.age || data.age.trim() === '' || data.age === 'Unknown') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Age is required for lost pet reports",
+        path: ['age'],
+      });
+    }
+  }
 });
 
 export const insertDogReportImageSchema = createInsertSchema(dogReportImages).omit({

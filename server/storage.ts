@@ -386,14 +386,23 @@ export class DatabaseStorage implements IStorage {
           ));
 
         // Decrement appropriate count
-        const updateField = reactionType === 'like' ? 'likesCount' : 'lovesCount';
-        await db
-          .update(stories)
-          .set({ 
-            [updateField]: sql`${stories[updateField]} - 1`,
-            updatedAt: new Date()
-          })
-          .where(eq(stories.id, storyId));
+        if (reactionType === 'like') {
+          await db
+            .update(stories)
+            .set({ 
+              likesCount: sql`GREATEST(0, ${stories.likesCount} - 1)`,
+              updatedAt: new Date()
+            })
+            .where(eq(stories.id, storyId));
+        } else {
+          await db
+            .update(stories)
+            .set({ 
+              lovesCount: sql`GREATEST(0, ${stories.lovesCount} - 1)`,
+              updatedAt: new Date()
+            })
+            .where(eq(stories.id, storyId));
+        }
 
         // Get updated counts
         const [story] = await db
@@ -410,8 +419,6 @@ export class DatabaseStorage implements IStorage {
       } else {
         // Change reaction type
         const oldType = existingReaction.reactionType as 'like' | 'love';
-        const oldField = oldType === 'like' ? 'likesCount' : 'lovesCount';
-        const newField = reactionType === 'like' ? 'likesCount' : 'lovesCount';
 
         // Update reaction type
         await db
@@ -423,14 +430,25 @@ export class DatabaseStorage implements IStorage {
           ));
 
         // Update counts: decrement old, increment new
-        await db
-          .update(stories)
-          .set({
-            [oldField]: sql`${stories[oldField]} - 1`,
-            [newField]: sql`${stories[newField]} + 1`,
-            updatedAt: new Date()
-          })
-          .where(eq(stories.id, storyId));
+        if (oldType === 'like' && reactionType === 'love') {
+          await db
+            .update(stories)
+            .set({
+              likesCount: sql`GREATEST(0, ${stories.likesCount} - 1)`,
+              lovesCount: sql`${stories.lovesCount} + 1`,
+              updatedAt: new Date()
+            })
+            .where(eq(stories.id, storyId));
+        } else {
+          await db
+            .update(stories)
+            .set({
+              likesCount: sql`${stories.likesCount} + 1`,
+              lovesCount: sql`GREATEST(0, ${stories.lovesCount} - 1)`,
+              updatedAt: new Date()
+            })
+            .where(eq(stories.id, storyId));
+        }
 
         // Get updated counts
         const [story] = await db
@@ -452,14 +470,23 @@ export class DatabaseStorage implements IStorage {
         .values({ storyId, userId, reactionType });
 
       // Increment appropriate count
-      const updateField = reactionType === 'like' ? 'likesCount' : 'lovesCount';
-      await db
-        .update(stories)
-        .set({ 
-          [updateField]: sql`${stories[updateField]} + 1`,
-          updatedAt: new Date()
-        })
-        .where(eq(stories.id, storyId));
+      if (reactionType === 'like') {
+        await db
+          .update(stories)
+          .set({ 
+            likesCount: sql`${stories.likesCount} + 1`,
+            updatedAt: new Date()
+          })
+          .where(eq(stories.id, storyId));
+      } else {
+        await db
+          .update(stories)
+          .set({ 
+            lovesCount: sql`${stories.lovesCount} + 1`,
+            updatedAt: new Date()
+          })
+          .where(eq(stories.id, storyId));
+      }
 
       // Get updated counts
       const [story] = await db

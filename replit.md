@@ -4,6 +4,7 @@ This is a modern web application called "Paw Finder" (also called "PawsConnect")
 
 # Recent Changes (November 24, 2025)
 
+- **Reward Field Enhancement**: Reward amount field now only visible for lost pet reports with disclaimer "(Transactions are not made through Paw Finder)"; reports display "(No reward if found)" when amount is $0 or not specified
 - **Success Stories Feature**: Added Facebook-style success stories page with 5-star rating system, like/love reactions with accurate count tracking, pagination (show 3 initially with "View More" button), and story submission form
 - **Story Reactions System**: Implemented dual reaction types (like 👍 and love ❤️) with separate likesCount and lovesCount tracking, proper toggle logic, and database constraints to prevent negative counts
 - **Enhanced Report Validation**: Contact info (phone/email) now mandatory for all pet reports; lost reports require name, breed, size, and age; found reports allow "Unknown" checkboxes for name, breed, and age

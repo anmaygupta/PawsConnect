@@ -1,6 +1,13 @@
 # Overview
 
-This is a modern web application called "Paw Finder" designed to help reunite lost dogs with their families. The platform allows users to report lost or found dogs, search for reports by location, and facilitate communication between pet owners and finders. Built with a full-stack TypeScript architecture using React for the frontend and Express.js for the backend.
+This is a modern web application called "Paw Finder" (also called "PawsConnect") designed to help reunite lost cats and dogs with their families. The platform allows users to report lost or found pets, search for reports by location, and facilitate communication between pet owners and finders. Built with a full-stack TypeScript architecture using React for the frontend and Express.js for the backend.
+
+# Recent Changes (November 24, 2025)
+
+- **Public Search Functionality**: Search pages (`/search` and `/search/:zipCode`) are now accessible to both authenticated and guest users, allowing anyone to search for lost pets without needing to sign in
+- **Surrounding ZIP Code Suggestions**: Search results now include clickable buttons for surrounding ZIP codes (±1-5 range) to help users expand their search area
+- **Report Cards Display**: Implemented comprehensive report card UI with pet images, badges for lost/found status, detailed pet information, and location/date details
+- **ZIP Code Helper Functions**: Added `getSurroundingZipCodes()` utility to calculate nearby ZIP codes for improved search discoverability
 
 # User Preferences
 

@@ -35,7 +35,7 @@ export default function Search() {
     queryKey: ['/api/reports/search', zipCode],
     queryFn: async () => {
       if (!zipCode) return [];
-      const response = await fetch(`/api/reports/search?zipCode=${zipCode}`);
+      const response = await fetch(`/api/reports/search/${zipCode}`);
       if (!response.ok) throw new Error('Failed to fetch reports');
       return response.json();
     },

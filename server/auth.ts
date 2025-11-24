@@ -46,7 +46,8 @@ export async function setupAuth(app: Express) {
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: callbackURL
+      callbackURL: callbackURL,
+      state: true // Enable automatic CSRF state parameter generation and validation
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -80,15 +81,13 @@ export async function setupAuth(app: Express) {
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     app.get("/api/auth/google",
       passport.authenticate("google", { 
-        scope: ["profile", "email"],
-        state: true // Enable OAuth state parameter for CSRF protection
+        scope: ["profile", "email"]
       })
     );
 
     app.get("/api/auth/google/callback",
       passport.authenticate("google", { 
-        failureRedirect: "/",
-        state: true // Validate OAuth state parameter for CSRF protection
+        failureRedirect: "/"
       }),
       (req, res) => {
         // Successful authentication, redirect home

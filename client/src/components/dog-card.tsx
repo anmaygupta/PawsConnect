@@ -9,8 +9,8 @@ interface DogCardProps {
 
 export default function DogCard({ report }: DogCardProps) {
   const handleContact = () => {
-    const subject = `Regarding ${report.type} dog: ${report.dogName || 'Unnamed Dog'}`;
-    const body = `Hi,\n\nI saw your ${report.type} dog report for ${report.dogName || 'the dog'} and wanted to get in touch.\n\nBest regards`;
+    const subject = `Regarding ${report.type} dog: ${report.petName || 'Unnamed Dog'}`;
+    const body = `Hi,\n\nI saw your ${report.type} dog report for ${report.petName || 'the dog'} and wanted to get in touch.\n\nBest regards`;
     const mailtoLink = `mailto:${report.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoLink, '_blank');
   };
@@ -37,7 +37,7 @@ export default function DogCard({ report }: DogCardProps) {
         {report.images.length > 0 ? (
           <img 
             src={report.images[0].imageUrl} 
-            alt={report.dogName || 'Dog'}
+            alt={report.petName || 'Dog'}
             className="w-full h-48 object-cover"
           />
         ) : (
@@ -58,16 +58,20 @@ export default function DogCard({ report }: DogCardProps) {
           )}
         </div>
         
-        {report.rewardAmount && (
+        {report.type === 'lost' && (
           <div className="absolute top-3 right-3 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm font-medium">
-            ${report.rewardAmount} Reward
+            {report.rewardAmount && parseFloat(report.rewardAmount.toString()) > 0 ? (
+              `$${report.rewardAmount} Reward`
+            ) : (
+              '(No reward if found)'
+            )}
           </div>
         )}
       </div>
       
       <CardContent className="p-4">
         <h3 className="font-semibold text-lg mb-2" data-testid={`text-dog-name-${report.id}`}>
-          {report.dogName || 'Unnamed Dog'}
+          {report.petName || 'Unnamed Dog'}
         </h3>
         <p className="text-sm text-muted-foreground mb-2">
           {report.breed} • {report.gender} • {report.age}

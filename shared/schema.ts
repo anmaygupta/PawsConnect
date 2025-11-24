@@ -101,12 +101,22 @@ export const stories = pgTable("stories", {
   userId: varchar("user_id").notNull().references(() => users.id),
   title: varchar("title").notNull(),
   content: text("content").notNull(),
-  rating: integer("rating").notNull(), // 1-5 stars rating of the service
+  rating: integer("rating").notNull(), // 1-5 paws rating of the service
   likesCount: integer("likes_count").notNull().default(0),
   lovesCount: integer("loves_count").notNull().default(0),
   commentsCount: integer("comments_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Story images table
+export const storyImages = pgTable("story_images", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  storyId: varchar("story_id").notNull().references(() => stories.id, { onDelete: 'cascade' }),
+  imageUrl: varchar("image_url").notNull(),
+  fileName: varchar("file_name").notNull(),
+  fileSize: integer("file_size").notNull(),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
 });
 
 // Story reactions table (likes and loves)
@@ -280,6 +290,8 @@ export type InsertEmailNotification = z.infer<typeof insertEmailNotificationSche
 export type EmailNotification = typeof emailNotifications.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
 export type Story = typeof stories.$inferSelect;
+export type StoryImage = typeof storyImages.$inferSelect;
+export type InsertStoryImage = typeof storyImages.$inferInsert;
 export type InsertStoryReaction = z.infer<typeof insertStoryReactionSchema>;
 export type StoryReaction = typeof storyReactions.$inferSelect;
 export type InsertStoryComment = z.infer<typeof insertStoryCommentSchema>;
@@ -293,6 +305,7 @@ export type DogReportWithImages = DogReport & {
 
 export type StoryWithDetails = Story & {
   user: PublicUser;
+  images: StoryImage[];
   comments: (StoryComment & { user: PublicUser })[];
   userReaction?: 'like' | 'love' | null;
 };

@@ -286,15 +286,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/stories', isAuthenticated, async (req: any, res) => {
+  app.post('/api/stories', isAuthenticated, upload.array('images', 5), async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "User ID not found" });
       }
-      const storyData = insertStorySchema.parse(req.body);
       
+      // Parse story data from multipart form
+      const storyData = insertStorySchema.parse(JSON.parse(req.body.storyData || '{}'));
+      
+      // Create story
       const story = await storage.createStory(storyData, userId);
+      
+      // Handle image uploads (max 5 images)
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        for (const file of req.files.slice(0, 5)) { // Ensure max 5 images
+          await storage.addStoryImage({
+            storyId: story.id,
+            imageUrl: `/uploads/${file.filename}`,
+            fileName: file.originalname,
+            fileSize: file.size,
+          });
+        }
+      }
+      
+      // Get complete story with all relations
       const completeStory = await storage.getStory(story.id);
       
       res.status(201).json(completeStory);

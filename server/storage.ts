@@ -4,6 +4,7 @@ import {
   dogReportImages,
   emailNotifications,
   stories,
+  storyImages,
   storyReactions,
   storyComments,
   type User,
@@ -18,6 +19,8 @@ import {
   type DogReportWithImages,
   type Story,
   type InsertStory,
+  type StoryImage,
+  type InsertStoryImage,
   type StoryReaction,
   type InsertStoryReaction,
   type StoryComment,
@@ -59,6 +62,10 @@ export interface IStorage {
   createStory(story: InsertStory, userId: string): Promise<Story>;
   getStories(limit?: number): Promise<StoryWithDetails[]>;
   getStory(id: string): Promise<StoryWithDetails | undefined>;
+  
+  // Story image operations
+  addStoryImage(image: InsertStoryImage): Promise<StoryImage>;
+  getStoryImages(storyId: string): Promise<StoryImage[]>;
   
   // Story reaction operations
   toggleStoryReaction(storyId: string, userId: string, reactionType: 'like' | 'love'): Promise<{ 
@@ -365,11 +372,13 @@ export class DatabaseStorage implements IStorage {
           .from(users)
           .where(eq(users.id, story.userId));
 
+        const images = await this.getStoryImages(story.id);
         const comments = await this.getStoryComments(story.id);
 
         return {
           ...story,
           user: user!,
+          images,
           comments,
         };
       })
@@ -399,13 +408,31 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .where(eq(users.id, story.userId));
 
+    const images = await this.getStoryImages(id);
     const comments = await this.getStoryComments(id);
 
     return {
       ...story,
       user: user!,
+      images,
       comments,
     };
+  }
+
+  // Story image operations
+  async addStoryImage(image: InsertStoryImage): Promise<StoryImage> {
+    const [createdImage] = await db
+      .insert(storyImages)
+      .values(image)
+      .returning();
+    return createdImage;
+  }
+
+  async getStoryImages(storyId: string): Promise<StoryImage[]> {
+    return await db
+      .select()
+      .from(storyImages)
+      .where(eq(storyImages.storyId, storyId));
   }
 
   // Story reaction operations

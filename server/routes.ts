@@ -308,7 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/stories/:id/like', isAuthenticated, async (req: any, res) => {
+  app.post('/api/stories/:id/react', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = req.params.id;
       const userId = getUserId(req);
@@ -316,11 +316,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "User ID not found" });
       }
       
-      const result = await storage.toggleStoryLike(storyId, userId);
+      const { reactionType } = req.body;
+      if (reactionType !== 'like' && reactionType !== 'love') {
+        return res.status(400).json({ message: "Invalid reaction type. Must be 'like' or 'love'" });
+      }
+      
+      const result = await storage.toggleStoryReaction(storyId, userId, reactionType);
       res.json(result);
     } catch (error) {
-      console.error("Error toggling story like:", error);
-      res.status(500).json({ message: "Failed to toggle like" });
+      console.error("Error toggling story reaction:", error);
+      res.status(500).json({ message: "Failed to toggle reaction" });
     }
   });
 

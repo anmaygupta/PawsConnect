@@ -4,7 +4,7 @@ import {
   dogReportImages,
   emailNotifications,
   stories,
-  storyLikes,
+  storyReactions,
   storyComments,
   type User,
   type UpsertUser,
@@ -17,8 +17,8 @@ import {
   type DogReportWithImages,
   type Story,
   type InsertStory,
-  type StoryLike,
-  type InsertStoryLike,
+  type StoryReaction,
+  type InsertStoryReaction,
   type StoryComment,
   type InsertStoryComment,
   type StoryWithDetails,
@@ -56,11 +56,16 @@ export interface IStorage {
 
   // Story operations
   createStory(story: InsertStory, userId: string): Promise<Story>;
-  getStories(): Promise<StoryWithDetails[]>;
+  getStories(limit?: number): Promise<StoryWithDetails[]>;
   getStory(id: string): Promise<StoryWithDetails | undefined>;
   
-  // Story like operations
-  toggleStoryLike(storyId: string, userId: string): Promise<{ liked: boolean; likesCount: number }>;
+  // Story reaction operations
+  toggleStoryReaction(storyId: string, userId: string, reactionType: 'like' | 'love'): Promise<{ 
+    reacted: boolean; 
+    reaction: 'like' | 'love' | null; 
+    likesCount: number; 
+    lovesCount: number; 
+  }>;
   
   // Story comment operations
   addStoryComment(comment: InsertStoryComment, userId: string): Promise<StoryComment>;
@@ -300,11 +305,17 @@ export class DatabaseStorage implements IStorage {
     return createdStory;
   }
 
-  async getStories(): Promise<StoryWithDetails[]> {
-    const storiesData = await db
+  async getStories(limit?: number): Promise<StoryWithDetails[]> {
+    let query = db
       .select()
       .from(stories)
       .orderBy(desc(stories.createdAt));
+
+    if (limit) {
+      query = query.limit(limit) as any;
+    }
+
+    const storiesData = await query;
 
     const storiesWithDetails = await Promise.all(
       storiesData.map(async (story) => {
@@ -348,64 +359,120 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  // Story like operations
-  async toggleStoryLike(storyId: string, userId: string): Promise<{ liked: boolean; likesCount: number }> {
-    // Check if user already liked this story
-    const [existingLike] = await db
+  // Story reaction operations
+  async toggleStoryReaction(storyId: string, userId: string, reactionType: 'like' | 'love'): Promise<{ 
+    reacted: boolean; 
+    reaction: 'like' | 'love' | null; 
+    likesCount: number; 
+    lovesCount: number; 
+  }> {
+    // Check if user already reacted to this story
+    const [existingReaction] = await db
       .select()
-      .from(storyLikes)
+      .from(storyReactions)
       .where(and(
-        eq(storyLikes.storyId, storyId),
-        eq(storyLikes.userId, userId)
+        eq(storyReactions.storyId, storyId),
+        eq(storyReactions.userId, userId)
       ));
 
-    if (existingLike) {
-      // Unlike the story
-      await db
-        .delete(storyLikes)
-        .where(and(
-          eq(storyLikes.storyId, storyId),
-          eq(storyLikes.userId, userId)
-        ));
+    if (existingReaction) {
+      if (existingReaction.reactionType === reactionType) {
+        // Remove reaction if clicking the same type
+        await db
+          .delete(storyReactions)
+          .where(and(
+            eq(storyReactions.storyId, storyId),
+            eq(storyReactions.userId, userId)
+          ));
 
-      // Decrement likes count
-      await db
-        .update(stories)
-        .set({ 
-          likesCount: sql`${stories.likesCount} - 1`,
-          updatedAt: new Date()
-        })
-        .where(eq(stories.id, storyId));
+        // Decrement appropriate count
+        const updateField = reactionType === 'like' ? 'likesCount' : 'lovesCount';
+        await db
+          .update(stories)
+          .set({ 
+            [updateField]: sql`${stories[updateField]} - 1`,
+            updatedAt: new Date()
+          })
+          .where(eq(stories.id, storyId));
 
-      // Get updated count
-      const [story] = await db
-        .select({ likesCount: stories.likesCount })
-        .from(stories)
-        .where(eq(stories.id, storyId));
+        // Get updated counts
+        const [story] = await db
+          .select({ likesCount: stories.likesCount, lovesCount: stories.lovesCount })
+          .from(stories)
+          .where(eq(stories.id, storyId));
 
-      return { liked: false, likesCount: story?.likesCount || 0 };
+        return { 
+          reacted: false, 
+          reaction: null,
+          likesCount: story?.likesCount || 0,
+          lovesCount: story?.lovesCount || 0
+        };
+      } else {
+        // Change reaction type
+        const oldType = existingReaction.reactionType as 'like' | 'love';
+        const oldField = oldType === 'like' ? 'likesCount' : 'lovesCount';
+        const newField = reactionType === 'like' ? 'likesCount' : 'lovesCount';
+
+        // Update reaction type
+        await db
+          .update(storyReactions)
+          .set({ reactionType })
+          .where(and(
+            eq(storyReactions.storyId, storyId),
+            eq(storyReactions.userId, userId)
+          ));
+
+        // Update counts: decrement old, increment new
+        await db
+          .update(stories)
+          .set({
+            [oldField]: sql`${stories[oldField]} - 1`,
+            [newField]: sql`${stories[newField]} + 1`,
+            updatedAt: new Date()
+          })
+          .where(eq(stories.id, storyId));
+
+        // Get updated counts
+        const [story] = await db
+          .select({ likesCount: stories.likesCount, lovesCount: stories.lovesCount })
+          .from(stories)
+          .where(eq(stories.id, storyId));
+
+        return { 
+          reacted: true, 
+          reaction: reactionType,
+          likesCount: story?.likesCount || 0,
+          lovesCount: story?.lovesCount || 0
+        };
+      }
     } else {
-      // Like the story
+      // Add new reaction
       await db
-        .insert(storyLikes)
-        .values({ storyId, userId });
+        .insert(storyReactions)
+        .values({ storyId, userId, reactionType });
 
-      // Increment likes count
+      // Increment appropriate count
+      const updateField = reactionType === 'like' ? 'likesCount' : 'lovesCount';
       await db
         .update(stories)
         .set({ 
-          likesCount: sql`${stories.likesCount} + 1`,
+          [updateField]: sql`${stories[updateField]} + 1`,
           updatedAt: new Date()
         })
         .where(eq(stories.id, storyId));
 
-      // Get updated count
+      // Get updated counts
       const [story] = await db
-        .select({ likesCount: stories.likesCount })
+        .select({ likesCount: stories.likesCount, lovesCount: stories.lovesCount })
         .from(stories)
         .where(eq(stories.id, storyId));
 
-      return { liked: true, likesCount: story?.likesCount || 0 };
+      return { 
+        reacted: true, 
+        reaction: reactionType,
+        likesCount: story?.likesCount || 0,
+        lovesCount: story?.lovesCount || 0
+      };
     }
   }
 

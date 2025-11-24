@@ -101,20 +101,23 @@ export const stories = pgTable("stories", {
   userId: varchar("user_id").notNull().references(() => users.id),
   title: varchar("title").notNull(),
   content: text("content").notNull(),
+  rating: integer("rating").notNull(), // 1-5 stars rating of the service
   likesCount: integer("likes_count").notNull().default(0),
+  lovesCount: integer("loves_count").notNull().default(0),
   commentsCount: integer("comments_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Story likes table
-export const storyLikes = pgTable("story_likes", {
+// Story reactions table (likes and loves)
+export const storyReactions = pgTable("story_reactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   storyId: varchar("story_id").notNull().references(() => stories.id, { onDelete: 'cascade' }),
   userId: varchar("user_id").notNull().references(() => users.id),
+  reactionType: varchar("reaction_type").notNull(), // 'like' or 'love'
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
-  unique("story_likes_user_story_unique").on(table.storyId, table.userId),
+  unique("story_reactions_user_story_unique").on(table.storyId, table.userId),
 ]);
 
 // Story comments table
@@ -199,14 +202,19 @@ export const insertStorySchema = createInsertSchema(stories).omit({
   id: true,
   userId: true,
   likesCount: true,
+  lovesCount: true,
   commentsCount: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  rating: z.number().int().min(1, "Rating must be at least 1").max(5, "Rating cannot exceed 5"),
 });
 
-export const insertStoryLikeSchema = createInsertSchema(storyLikes).omit({
+export const insertStoryReactionSchema = createInsertSchema(storyReactions).omit({
   id: true,
   createdAt: true,
+}).extend({
+  reactionType: z.enum(['like', 'love'], { required_error: "Reaction type is required" }),
 });
 
 export const insertStoryCommentSchema = createInsertSchema(storyComments).omit({
@@ -226,8 +234,8 @@ export type InsertEmailNotification = z.infer<typeof insertEmailNotificationSche
 export type EmailNotification = typeof emailNotifications.$inferSelect;
 export type InsertStory = z.infer<typeof insertStorySchema>;
 export type Story = typeof stories.$inferSelect;
-export type InsertStoryLike = z.infer<typeof insertStoryLikeSchema>;
-export type StoryLike = typeof storyLikes.$inferSelect;
+export type InsertStoryReaction = z.infer<typeof insertStoryReactionSchema>;
+export type StoryReaction = typeof storyReactions.$inferSelect;
 export type InsertStoryComment = z.infer<typeof insertStoryCommentSchema>;
 export type StoryComment = typeof storyComments.$inferSelect;
 
@@ -240,5 +248,5 @@ export type DogReportWithImages = DogReport & {
 export type StoryWithDetails = Story & {
   user: User;
   comments: (StoryComment & { user: User })[];
-  userHasLiked?: boolean;
+  userReaction?: 'like' | 'love' | null;
 };

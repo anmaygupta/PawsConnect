@@ -501,6 +501,9 @@ export default function ReportForm() {
                     data-testid="input-reward"
                   />
                 </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  (Transactions are not made through Paw Finder)
+                </p>
               </div>
             </div>
           )}

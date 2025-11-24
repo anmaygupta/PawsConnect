@@ -91,9 +91,25 @@ export class DatabaseStorage implements IStorage {
 
   // Dog report operations
   async createDogReport(report: InsertDogReport, userId: string): Promise<DogReport> {
+    // Normalize rewardAmount: convert number to string, keep null/undefined as is
+    // Database expects string | null for decimal column
+    let normalizedRewardAmount: string | null | undefined;
+    if (typeof report.rewardAmount === 'number') {
+      normalizedRewardAmount = String(report.rewardAmount);
+    } else {
+      normalizedRewardAmount = report.rewardAmount;
+    }
+    
+    // Merge validated input with userId for database insertion
+    const reportData: typeof dogReports.$inferInsert = {
+      ...report,
+      userId,
+      rewardAmount: normalizedRewardAmount,
+    };
+    
     const [createdReport] = await db
       .insert(dogReports)
-      .values({ ...report, userId } as typeof dogReports.$inferInsert)
+      .values(reportData)
       .returning();
     return createdReport;
   }

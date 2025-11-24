@@ -93,7 +93,7 @@ export class DatabaseStorage implements IStorage {
   async createDogReport(report: InsertDogReport, userId: string): Promise<DogReport> {
     const [createdReport] = await db
       .insert(dogReports)
-      .values({ ...report, userId })
+      .values({ ...report, userId } as typeof dogReports.$inferInsert)
       .returning();
     return createdReport;
   }

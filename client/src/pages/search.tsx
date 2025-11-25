@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AlertTriangle, CheckCircle, MapPin, Calendar, PawPrint, Pencil, Trash2 } from "lucide-react";
 import { lookupCity, getSurroundingZipCodes } from "@/lib/zipCodeLookup";
 import { format } from "date-fns";
@@ -64,6 +65,7 @@ export default function Search() {
     rewardAmount: '',
   });
   const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
+  const [preferNoPhone, setPreferNoPhone] = useState(false);
 
   const { data: reports, isLoading, error } = useQuery<DogReport[]>({
     queryKey: ['/api/reports/search', zipCode],
@@ -126,6 +128,7 @@ export default function Search() {
 
   const handleEditClick = (report: DogReport) => {
     setEditingReport(report);
+    setPreferNoPhone(!report.contactPhone);
     setEditForm({
       petName: report.petName || '',
       breed: report.breed || '',
@@ -463,13 +466,29 @@ export default function Search() {
                 <Input
                   value={editForm.contactPhone}
                   onChange={(e) => setEditForm({ ...editForm, contactPhone: e.target.value })}
-                  placeholder="Phone number"
+                  placeholder={preferNoPhone ? "Prefer not to share" : "(555) 123-4567"}
+                  disabled={preferNoPhone}
                 />
+                <div className="flex items-center gap-2 mt-1">
+                  <Checkbox
+                    id="preferNoPhone"
+                    checked={preferNoPhone}
+                    onCheckedChange={(checked) => {
+                      setPreferNoPhone(checked as boolean);
+                      if (checked) {
+                        setEditForm({ ...editForm, contactPhone: '' });
+                      }
+                    }}
+                  />
+                  <label htmlFor="preferNoPhone" className="text-sm text-muted-foreground cursor-pointer">
+                    Prefer not to share
+                  </label>
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Contact Email</label>
+                <label className="block text-sm font-medium mb-1">Contact Email <span className="text-destructive">*</span></label>
                 <Input
                   value={editForm.contactEmail}
                   onChange={(e) => setEditForm({ ...editForm, contactEmail: e.target.value })}

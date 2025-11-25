@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   AlertTriangle, 
   CheckCircle, 
@@ -90,6 +91,7 @@ export default function ReportDetail() {
   });
   const [deletingReport, setDeletingReport] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [preferNoPhone, setPreferNoPhone] = useState(false);
 
   const { data: report, isLoading, error } = useQuery<DogReport>({
     queryKey: ['/api/reports', reportId],
@@ -148,6 +150,7 @@ export default function ReportDetail() {
 
   const handleEditClick = () => {
     if (!report) return;
+    setPreferNoPhone(!report.contactPhone);
     setEditForm({
       petName: report.petName || '',
       breed: report.breed || '',
@@ -565,8 +568,24 @@ export default function ReportDetail() {
                 <Input
                   value={editForm.contactPhone}
                   onChange={(e) => setEditForm({ ...editForm, contactPhone: e.target.value })}
-                  placeholder="Phone number"
+                  placeholder={preferNoPhone ? "Prefer not to share" : "(555) 123-4567"}
+                  disabled={preferNoPhone}
                 />
+                <div className="flex items-center gap-2 mt-1">
+                  <Checkbox
+                    id="preferNoPhoneDetail"
+                    checked={preferNoPhone}
+                    onCheckedChange={(checked) => {
+                      setPreferNoPhone(checked as boolean);
+                      if (checked) {
+                        setEditForm({ ...editForm, contactPhone: '' });
+                      }
+                    }}
+                  />
+                  <label htmlFor="preferNoPhoneDetail" className="text-sm text-muted-foreground cursor-pointer">
+                    Prefer not to share
+                  </label>
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

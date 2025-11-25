@@ -59,8 +59,8 @@ export const dogReports = pgTable("dog_reports", {
   lastSeenTime: varchar("last_seen_time"),
   
   // Contact information
-  contactName: varchar("contact_name").notNull(),
-  contactPhone: varchar("contact_phone").notNull(),
+  contactName: varchar("contact_name"),
+  contactPhone: varchar("contact_phone"),
   contactEmail: varchar("contact_email").notNull(),
   
   // Optional reward
@@ -169,14 +169,16 @@ export const insertDogReportSchema = createInsertSchema(dogReports).omit({
     .min(1, "Location is required")
     .max(200, "Location description too long"),
   
-  // Enhanced contact validation - all required
+  // Contact validation - email required, name and phone optional
   contactName: z.string()
-    .min(1, "Your name is required")
     .max(100, "Name too long")
-    .regex(/^[a-zA-Z\s\-'\.]+$/, "Name contains invalid characters"),
+    .regex(/^[a-zA-Z\s\-'\.]*$/, "Name contains invalid characters")
+    .optional()
+    .or(z.literal('')),
   contactPhone: z.string()
-    .min(1, "Phone number is required")
-    .regex(/^(\+1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/, "Please enter a valid US phone number"),
+    .regex(/^((\+1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4}))?$/, "Please enter a valid US phone number")
+    .optional()
+    .or(z.literal('')),
   contactEmail: z.string()
     .min(1, "Email address is required")
     .email("Valid email address is required")

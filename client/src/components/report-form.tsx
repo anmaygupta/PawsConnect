@@ -40,12 +40,14 @@ const reportSchema = z.object({
   lastSeenDate: z.string().min(1, "Date is required"),
   lastSeenTime: z.string().optional(),
   contactName: z.string()
-    .min(1, "Your name is required")
     .max(100, "Name too long")
-    .regex(/^[a-zA-Z\s\-'\.]+$/, "Name contains invalid characters"),
+    .regex(/^[a-zA-Z\s\-'\.]*$/, "Name contains invalid characters")
+    .optional()
+    .or(z.literal('')),
   contactPhone: z.string()
-    .min(1, "Phone number is required")
-    .regex(/^(\+1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/, "Please enter a valid US phone number"),
+    .regex(/^((\+1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4}))?$/, "Please enter a valid US phone number")
+    .optional()
+    .or(z.literal('')),
   contactEmail: z.string()
     .min(1, "Email address is required")
     .email("Valid email address is required")
@@ -83,6 +85,8 @@ export default function ReportForm() {
   const [nameUnknown, setNameUnknown] = useState(false);
   const [breedUnknown, setBreedUnknown] = useState(false);
   const [ageUnknown, setAgeUnknown] = useState(false);
+  const [preferNoName, setPreferNoName] = useState(false);
+  const [preferNoPhone, setPreferNoPhone] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -444,26 +448,60 @@ export default function ReportForm() {
             <h3 className="text-lg font-semibold">Contact Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="contactName">Your Name *</Label>
+                <Label htmlFor="contactName">Your Name</Label>
                 <Input
                   id="contactName"
                   {...form.register('contactName')}
-                  placeholder="Your full name"
+                  placeholder={preferNoName ? "Prefer not to share" : "Your full name"}
                   data-testid="input-contact-name"
+                  disabled={preferNoName}
+                  className={preferNoName ? "bg-muted" : ""}
                 />
+                <div className="flex items-center space-x-2 mt-2">
+                  <Checkbox
+                    id="preferNoName"
+                    checked={preferNoName}
+                    onCheckedChange={(checked) => {
+                      setPreferNoName(checked as boolean);
+                      if (checked) {
+                        form.setValue('contactName', '');
+                      }
+                    }}
+                  />
+                  <label htmlFor="preferNoName" className="text-sm text-muted-foreground cursor-pointer">
+                    Prefer not to share
+                  </label>
+                </div>
                 {form.formState.errors.contactName && (
                   <p className="text-sm text-destructive mt-1">{form.formState.errors.contactName.message}</p>
                 )}
               </div>
               <div>
-                <Label htmlFor="contactPhone">Phone Number *</Label>
+                <Label htmlFor="contactPhone">Phone Number</Label>
                 <Input
                   id="contactPhone"
                   type="tel"
                   {...form.register('contactPhone')}
-                  placeholder="(555) 123-4567"
+                  placeholder={preferNoPhone ? "Prefer not to share" : "(555) 123-4567"}
                   data-testid="input-contact-phone"
+                  disabled={preferNoPhone}
+                  className={preferNoPhone ? "bg-muted" : ""}
                 />
+                <div className="flex items-center space-x-2 mt-2">
+                  <Checkbox
+                    id="preferNoPhone"
+                    checked={preferNoPhone}
+                    onCheckedChange={(checked) => {
+                      setPreferNoPhone(checked as boolean);
+                      if (checked) {
+                        form.setValue('contactPhone', '');
+                      }
+                    }}
+                  />
+                  <label htmlFor="preferNoPhone" className="text-sm text-muted-foreground cursor-pointer">
+                    Prefer not to share
+                  </label>
+                </div>
                 {form.formState.errors.contactPhone && (
                   <p className="text-sm text-destructive mt-1">{form.formState.errors.contactPhone.message}</p>
                 )}

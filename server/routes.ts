@@ -322,6 +322,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.body.contactEmail !== undefined) updates.contactEmail = sanitizeHtml(req.body.contactEmail || '', sanitizeOptions);
       if (req.body.rewardAmount !== undefined) updates.rewardAmount = req.body.rewardAmount ? parseFloat(req.body.rewardAmount) : null;
 
+      // Validate size if provided
+      if (updates.size && !['small', 'medium', 'large', 'extra-large'].includes(updates.size)) {
+        return res.status(400).json({ message: "Invalid size value" });
+      }
+
+      // Validate gender if provided
+      if (updates.gender && !['male', 'female', 'unknown'].includes(updates.gender)) {
+        return res.status(400).json({ message: "Invalid gender value" });
+      }
+
+      // Validate rewardAmount if provided (must be a valid number or empty)
+      if (updates.rewardAmount !== undefined && updates.rewardAmount !== null) {
+        if (typeof updates.rewardAmount === 'number' && isNaN(updates.rewardAmount)) {
+          return res.status(400).json({ message: "Invalid reward amount format" });
+        }
+      }
+
+      // Validate all required fields won't be emptied
+      const finalDescription = updates.description !== undefined ? updates.description : report.description;
+      const finalPrimaryColor = updates.primaryColor !== undefined ? updates.primaryColor : report.primaryColor;
+      const finalLastSeenLocation = updates.lastSeenLocation !== undefined ? updates.lastSeenLocation : report.lastSeenLocation;
+      const finalZipCode = updates.zipCode !== undefined ? updates.zipCode : report.zipCode;
+      const finalSize = updates.size !== undefined ? updates.size : report.size;
+
+      if (!finalDescription || finalDescription.trim().length < 10) {
+        return res.status(400).json({ message: "Description must be at least 10 characters" });
+      }
+      if (!finalPrimaryColor || finalPrimaryColor.trim() === '') {
+        return res.status(400).json({ message: "Primary color is required" });
+      }
+      if (!finalLastSeenLocation || finalLastSeenLocation.trim() === '') {
+        return res.status(400).json({ message: "Location is required" });
+      }
+      if (!finalZipCode || !/^\d{5}(-\d{4})?$/.test(finalZipCode)) {
+        return res.status(400).json({ message: "Valid ZIP code is required" });
+      }
+      if (!finalSize) {
+        return res.status(400).json({ message: "Size is required" });
+      }
+
+      // For lost reports, validate additional required fields
+      if (report.type === 'lost') {
+        const finalPetName = updates.petName !== undefined ? updates.petName : report.petName;
+        const finalBreed = updates.breed !== undefined ? updates.breed : report.breed;
+        const finalAge = updates.age !== undefined ? updates.age : report.age;
+        
+        if (!finalPetName || finalPetName.trim() === '' || finalPetName === 'Unknown') {
+          return res.status(400).json({ message: "Pet name is required for lost pet reports" });
+        }
+        if (!finalBreed || finalBreed.trim() === '' || finalBreed === 'Unknown') {
+          return res.status(400).json({ message: "Breed is required for lost pet reports" });
+        }
+        if (!finalAge || finalAge.trim() === '' || finalAge === 'Unknown') {
+          return res.status(400).json({ message: "Age is required for lost pet reports" });
+        }
+      }
+
+      // Email is always required
+      const finalEmail = updates.contactEmail !== undefined ? updates.contactEmail : report.contactEmail;
+      if (!finalEmail || finalEmail.trim() === '') {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
       const updatedReport = await storage.updateDogReport(id, updates);
       
       // Get the complete report with images

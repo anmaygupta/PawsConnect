@@ -85,7 +85,10 @@ export default function Search() {
         credentials: 'include',
         body: JSON.stringify(updates),
       });
-      if (!response.ok) throw new Error('Failed to update report');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to update report');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -93,8 +96,8 @@ export default function Search() {
       setEditingReport(null);
       toast({ title: 'Report updated!', description: 'Your report has been updated successfully.' });
     },
-    onError: () => {
-      toast({ title: 'Error', description: 'Failed to update report. Please try again.', variant: 'destructive' });
+    onError: (error: Error) => {
+      toast({ title: 'Error', description: error.message || 'Failed to update report. Please try again.', variant: 'destructive' });
     },
   });
 
@@ -105,7 +108,10 @@ export default function Search() {
         method: 'DELETE',
         credentials: 'include',
       });
-      if (!response.ok) throw new Error('Failed to delete report');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to delete report');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -113,8 +119,8 @@ export default function Search() {
       setDeletingReportId(null);
       toast({ title: 'Report deleted', description: 'Your report has been removed.' });
     },
-    onError: () => {
-      toast({ title: 'Error', description: 'Failed to delete report. Please try again.', variant: 'destructive' });
+    onError: (error: Error) => {
+      toast({ title: 'Error', description: error.message || 'Failed to delete report. Please try again.', variant: 'destructive' });
     },
   });
 
@@ -149,8 +155,8 @@ export default function Search() {
     deleteReportMutation.mutate(deletingReportId);
   };
 
-  const isOwner = (report: DogReport) => {
-    return user && (user as any).id === report.userId;
+  const isOwner = (report: DogReport): boolean => {
+    return !!(user && (user as any).id === report.userId);
   };
 
   const city = zipCode ? lookupCity(zipCode) : null;

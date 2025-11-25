@@ -4,6 +4,16 @@ This is a modern web application called "Paw Finder" (also called "PawsConnect")
 
 # Recent Changes (November 25, 2025)
 
+- **Report Detail Page**: Full-page view when clicking on any pet report
+  - Large image display with thumbnail gallery for multiple photos
+  - Pet Details section (color, size, age, gender) with colored icon badges
+  - Location & Time section showing where/when pet was lost or found
+  - Full description display
+  - Reward section for lost pets
+  - Contact Information section with clickable email/phone links
+  - Edit/Delete buttons visible only to report owners
+  - Back button to return to search results
+- **Clickable Report Cards**: Search results now navigate to full detail view when clicked
 - **Report Edit/Delete Functionality**: Complete implementation with ownership verification
   - Edit modal allows updating pet name, breed, age, color, size, gender, description, location, ZIP code, and contact info
   - Delete confirmation dialog with warning message

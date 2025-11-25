@@ -41,6 +41,8 @@ export interface IStorage {
   getDogReportsByZipCode(zipCode: string, animalType?: string): Promise<DogReportWithImages[]>;
   getUserDogReports(userId: string): Promise<DogReportWithImages[]>;
   updateDogReportStatus(id: string, status: string): Promise<void>;
+  updateDogReport(id: string, updates: Partial<InsertDogReport>): Promise<DogReport | undefined>;
+  deleteDogReport(id: string): Promise<void>;
   getRecentReports(limit?: number): Promise<DogReportWithImages[]>;
   
   // Image operations
@@ -240,6 +242,30 @@ export class DatabaseStorage implements IStorage {
       .update(dogReports)
       .set({ status, updatedAt: new Date() })
       .where(eq(dogReports.id, id));
+  }
+
+  async updateDogReport(id: string, updates: Partial<InsertDogReport>): Promise<DogReport | undefined> {
+    // Normalize rewardAmount if provided
+    let normalizedUpdates = { ...updates };
+    if (updates.rewardAmount !== undefined) {
+      if (typeof updates.rewardAmount === 'number') {
+        normalizedUpdates.rewardAmount = String(updates.rewardAmount);
+      }
+    }
+    
+    const [updatedReport] = await db
+      .update(dogReports)
+      .set({ ...normalizedUpdates, updatedAt: new Date() })
+      .where(eq(dogReports.id, id))
+      .returning();
+    return updatedReport;
+  }
+
+  async deleteDogReport(id: string): Promise<void> {
+    // Delete associated images first (they have foreign key constraint)
+    await db.delete(dogReportImages).where(eq(dogReportImages.reportId, id));
+    // Delete the report
+    await db.delete(dogReports).where(eq(dogReports.id, id));
   }
 
   async getRecentReports(limit: number = 6): Promise<DogReportWithImages[]> {

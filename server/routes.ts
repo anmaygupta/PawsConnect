@@ -275,6 +275,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update a report
+  app.put('/api/reports/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
+
+      // Verify the report belongs to the user
+      const report = await storage.getDogReport(id);
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      
+      if (report.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to update this report" });
+      }
+
+      // Sanitize text inputs
+      const sanitizeOptions = {
+        allowedTags: [],
+        allowedAttributes: {},
+        textFilter: function(text: string) {
+          return text.trim();
+        }
+      };
+
+      const updates: any = {};
+      
+      // Only include fields that were provided
+      if (req.body.petName !== undefined) updates.petName = sanitizeHtml(req.body.petName || '', sanitizeOptions);
+      if (req.body.breed !== undefined) updates.breed = sanitizeHtml(req.body.breed || '', sanitizeOptions);
+      if (req.body.age !== undefined) updates.age = sanitizeHtml(req.body.age || '', sanitizeOptions);
+      if (req.body.primaryColor !== undefined) updates.primaryColor = sanitizeHtml(req.body.primaryColor || '', sanitizeOptions);
+      if (req.body.size !== undefined) updates.size = req.body.size;
+      if (req.body.gender !== undefined) updates.gender = req.body.gender;
+      if (req.body.description !== undefined) updates.description = sanitizeHtml(req.body.description || '', sanitizeOptions);
+      if (req.body.lastSeenLocation !== undefined) updates.lastSeenLocation = sanitizeHtml(req.body.lastSeenLocation || '', sanitizeOptions);
+      if (req.body.lastSeenDate !== undefined) updates.lastSeenDate = new Date(req.body.lastSeenDate);
+      if (req.body.lastSeenTime !== undefined) updates.lastSeenTime = sanitizeHtml(req.body.lastSeenTime || '', sanitizeOptions);
+      if (req.body.zipCode !== undefined) updates.zipCode = sanitizeHtml(req.body.zipCode || '', sanitizeOptions);
+      if (req.body.contactName !== undefined) updates.contactName = sanitizeHtml(req.body.contactName || '', sanitizeOptions);
+      if (req.body.contactPhone !== undefined) updates.contactPhone = sanitizeHtml(req.body.contactPhone || '', sanitizeOptions);
+      if (req.body.contactEmail !== undefined) updates.contactEmail = sanitizeHtml(req.body.contactEmail || '', sanitizeOptions);
+      if (req.body.rewardAmount !== undefined) updates.rewardAmount = req.body.rewardAmount ? parseFloat(req.body.rewardAmount) : null;
+
+      const updatedReport = await storage.updateDogReport(id, updates);
+      
+      // Get the complete report with images
+      const completeReport = await storage.getDogReport(id);
+      res.json(completeReport);
+    } catch (error) {
+      console.error("Error updating report:", error);
+      res.status(500).json({ message: "Failed to update report" });
+    }
+  });
+
+  // Delete a report
+  app.delete('/api/reports/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
+
+      // Verify the report belongs to the user
+      const report = await storage.getDogReport(id);
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      
+      if (report.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to delete this report" });
+      }
+
+      await storage.deleteDogReport(id);
+      res.json({ message: "Report deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting report:", error);
+      res.status(500).json({ message: "Failed to delete report" });
+    }
+  });
+
   // Story routes
   app.get('/api/stories', async (req, res) => {
     try {

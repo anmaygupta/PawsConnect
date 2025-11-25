@@ -221,227 +221,287 @@ export default function ReportDetail() {
   }
 
   const AnimalIcon = report.animalType === 'cat' ? Cat : Dog;
+  const mainImage = report.images && report.images.length > 0 
+    ? report.images[selectedImage ? parseInt(selectedImage) : 0]?.imageUrl || report.images[0].imageUrl
+    : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6 hover:bg-blue-100">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Search
-        </Button>
-
-        <div className="grid lg:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 to-blue-200 aspect-square flex items-center justify-center">
-              {report.images && report.images.length > 0 ? (
-                <img
-                  src={report.images[selectedImage ? parseInt(selectedImage) : 0]?.imageUrl || report.images[0].imageUrl}
-                  alt={report.petName || "Pet"}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <PawPrint className="h-32 w-32 text-blue-300" />
-              )}
-              <Badge 
-                className={`absolute top-4 left-4 text-lg px-4 py-2 ${
-                  report.type === "lost" 
-                    ? "bg-red-500 hover:bg-red-600" 
-                    : "bg-green-500 hover:bg-green-600"
-                }`}
-              >
-                {report.type === "lost" ? (
-                  <><AlertTriangle className="h-5 w-5 mr-2" /> Lost {report.animalType === 'cat' ? 'Cat' : 'Dog'}</>
-                ) : (
-                  <><CheckCircle className="h-5 w-5 mr-2" /> Found {report.animalType === 'cat' ? 'Cat' : 'Dog'}</>
-                )}
-              </Badge>
-            </div>
-
-            {report.images && report.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {report.images.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index.toString())}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === index.toString() || (!selectedImage && index === 0)
-                        ? 'border-orange-500 ring-2 ring-orange-200'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <img src={img.imageUrl} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+      
+      {/* Hero Image Section - Full Width */}
+      <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] bg-gradient-to-br from-blue-200 to-purple-200">
+        {mainImage ? (
+          <img
+            src={mainImage}
+            alt={report.petName || "Pet"}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <PawPrint className="h-48 w-48 text-white/50" />
           </div>
-
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <AnimalIcon className="h-8 w-8 text-orange-500" />
-                <h1 className="text-4xl font-bold text-gray-900">
-                  {report.petName || "Unknown Name"}
-                </h1>
-              </div>
-              <p className="text-xl text-gray-600">{report.breed}</p>
+        )}
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        
+        {/* Back Button */}
+        <Button 
+          variant="secondary" 
+          onClick={() => navigate(-1)} 
+          className="absolute top-4 left-4 bg-white/90 hover:bg-white shadow-lg"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        </Button>
+        
+        {/* Status Badge */}
+        <Badge 
+          className={`absolute top-4 right-4 text-lg px-5 py-2.5 shadow-lg ${
+            report.type === "lost" 
+              ? "bg-red-500 hover:bg-red-600" 
+              : "bg-green-500 hover:bg-green-600"
+          }`}
+        >
+          {report.type === "lost" ? (
+            <><AlertTriangle className="h-5 w-5 mr-2" /> LOST {report.animalType === 'cat' ? 'CAT' : 'DOG'}</>
+          ) : (
+            <><CheckCircle className="h-5 w-5 mr-2" /> FOUND {report.animalType === 'cat' ? 'CAT' : 'DOG'}</>
+          )}
+        </Badge>
+        
+        {/* Pet Name Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center gap-4 mb-2">
+              <AnimalIcon className="h-10 w-10 md:h-14 md:w-14 text-white" />
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white drop-shadow-lg">
+                {report.petName || "Unknown Name"}
+              </h1>
             </div>
-
-            {isOwner && (
-              <div className="flex gap-3">
-                <Button onClick={handleEditClick} variant="outline" className="flex items-center gap-2">
-                  <Pencil className="h-4 w-4" /> Edit Report
-                </Button>
-                <Button 
-                  onClick={() => setDeletingReport(true)} 
-                  variant="outline" 
-                  className="flex items-center gap-2 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200"
+            <p className="text-xl md:text-2xl text-white/90 ml-14 md:ml-[74px]">{report.breed}</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Thumbnail Gallery */}
+      {report.images && report.images.length > 1 && (
+        <div className="bg-white border-b shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {report.images.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImage(index.toString())}
+                  className={`flex-shrink-0 w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden border-3 transition-all ${
+                    selectedImage === index.toString() || (!selectedImage && index === 0)
+                      ? 'border-orange-500 ring-4 ring-orange-200 scale-105'
+                      : 'border-gray-200 hover:border-gray-400 hover:scale-102'
+                  }`}
                 >
-                  <Trash2 className="h-4 w-4" /> Delete
-                </Button>
-              </div>
-            )}
+                  <img src={img.imageUrl} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Owner Actions */}
+        {isOwner && (
+          <div className="flex gap-3 mb-8">
+            <Button onClick={handleEditClick} variant="outline" size="lg" className="flex items-center gap-2">
+              <Pencil className="h-5 w-5" /> Edit Report
+            </Button>
+            <Button 
+              onClick={() => setDeletingReport(true)} 
+              variant="outline" 
+              size="lg"
+              className="flex items-center gap-2 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200"
+            >
+              <Trash2 className="h-5 w-5" /> Delete Report
+            </Button>
+          </div>
+        )}
 
-            <Card className="border-2">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <PawPrint className="h-5 w-5 text-orange-500" /> Pet Details
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Column - Main Info */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Description Card */}
+            <Card className="shadow-lg border-0">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">About This Pet</h3>
+                <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">{report.description}</p>
+              </CardContent>
+            </Card>
+
+            {/* Pet Details Card */}
+            <Card className="shadow-lg border-0">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                  <PawPrint className="h-7 w-7 text-orange-500" /> Pet Details
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Palette className="h-5 w-5 text-blue-600" />
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-xl">
+                    <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Palette className="h-7 w-7 text-blue-600" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Color</p>
-                      <p className="font-medium capitalize">{report.primaryColor}</p>
-                    </div>
+                    <p className="text-sm text-gray-500 mb-1">Color</p>
+                    <p className="font-bold text-lg capitalize">{report.primaryColor}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                      <Ruler className="h-5 w-5 text-purple-600" />
+                  <div className="text-center p-4 bg-purple-50 rounded-xl">
+                    <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center">
+                      <Ruler className="h-7 w-7 text-purple-600" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Size</p>
-                      <p className="font-medium capitalize">{report.size}</p>
-                    </div>
+                    <p className="text-sm text-gray-500 mb-1">Size</p>
+                    <p className="font-bold text-lg capitalize">{report.size}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                      <Calendar className="h-5 w-5 text-green-600" />
+                  <div className="text-center p-4 bg-green-50 rounded-xl">
+                    <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
+                      <Calendar className="h-7 w-7 text-green-600" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Age</p>
-                      <p className="font-medium">{report.age}</p>
-                    </div>
+                    <p className="text-sm text-gray-500 mb-1">Age</p>
+                    <p className="font-bold text-lg">{report.age}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
-                      <AnimalIcon className="h-5 w-5 text-pink-600" />
+                  <div className="text-center p-4 bg-pink-50 rounded-xl">
+                    <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-pink-100 flex items-center justify-center">
+                      <AnimalIcon className="h-7 w-7 text-pink-600" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Gender</p>
-                      <p className="font-medium capitalize">{report.gender}</p>
-                    </div>
+                    <p className="text-sm text-gray-500 mb-1">Gender</p>
+                    <p className="font-bold text-lg capitalize">{report.gender}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-2">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-orange-500" /> Location & Time
+            {/* Location & Time Card */}
+            <Card className="shadow-lg border-0">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                  <MapPin className="h-7 w-7 text-orange-500" /> Location & Time
                 </h3>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="h-5 w-5 text-red-600" />
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="flex items-start gap-4 p-4 bg-red-50 rounded-xl">
+                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="h-6 w-6 text-red-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Last Seen Location</p>
-                      <p className="font-medium">{report.lastSeenLocation}</p>
-                      <p className="text-sm text-gray-600">{cityName ? `${cityName}, ` : ''}{report.zipCode}</p>
+                      <p className="text-sm text-gray-500 mb-1">{report.type === 'lost' ? 'Last Seen Location' : 'Found Location'}</p>
+                      <p className="font-bold text-lg">{report.lastSeenLocation}</p>
+                      <p className="text-gray-600">{cityName ? `${cityName}, ` : ''}{report.zipCode}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                      <Calendar className="h-5 w-5 text-amber-600" />
+                  <div className="flex items-start gap-4 p-4 bg-amber-50 rounded-xl">
+                    <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="h-6 w-6 text-amber-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Date {report.type === 'lost' ? 'Lost' : 'Found'}</p>
-                      <p className="font-medium">
+                      <p className="text-sm text-gray-500 mb-1">Date {report.type === 'lost' ? 'Lost' : 'Found'}</p>
+                      <p className="font-bold text-lg">
                         {report.lastSeenDate ? format(new Date(report.lastSeenDate), "MMMM d, yyyy") : "Unknown"}
                       </p>
+                      {report.lastSeenTime && (
+                        <p className="text-gray-600">at {report.lastSeenTime}</p>
+                      )}
                     </div>
                   </div>
-                  {report.lastSeenTime && (
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                        <Clock className="h-5 w-5 text-indigo-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Contact & Reward */}
+          <div className="space-y-6">
+            {/* Contact Card */}
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                  <User className="h-7 w-7" /> Contact Information
+                </h3>
+                <div className="space-y-5">
+                  {report.contactName && (
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                        <User className="h-6 w-6" />
+                      </div>
+                      <span className="text-xl font-medium">{report.contactName}</span>
+                    </div>
+                  )}
+                  {report.contactEmail && (
+                    <a 
+                      href={`mailto:${report.contactEmail}`} 
+                      className="flex items-center gap-4 p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                        <Mail className="h-6 w-6" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Time</p>
-                        <p className="font-medium">{report.lastSeenTime}</p>
+                        <p className="text-sm text-white/70">Email</p>
+                        <p className="text-lg font-medium">{report.contactEmail}</p>
                       </div>
-                    </div>
+                    </a>
+                  )}
+                  {report.contactPhone && (
+                    <a 
+                      href={`tel:${report.contactPhone}`} 
+                      className="flex items-center gap-4 p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                        <Phone className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-white/70">Phone</p>
+                        <p className="text-lg font-medium">{report.contactPhone}</p>
+                      </div>
+                    </a>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-2">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Description</h3>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{report.description}</p>
-              </CardContent>
-            </Card>
-
+            {/* Reward Card */}
             {report.type === 'lost' && (
-              <Card className="border-2 border-green-200 bg-green-50">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-green-800 mb-2 flex items-center gap-2">
-                    <DollarSign className="h-5 w-5" /> Reward
-                  </h3>
+              <Card className="shadow-lg border-0 bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+                <CardContent className="p-8 text-center">
+                  <DollarSign className="h-12 w-12 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold mb-2">Reward Offered</h3>
                   {report.rewardAmount && parseFloat(report.rewardAmount) > 0 ? (
-                    <p className="text-2xl font-bold text-green-700">${parseFloat(report.rewardAmount).toFixed(2)}</p>
+                    <p className="text-5xl font-bold mb-2">${parseFloat(report.rewardAmount).toFixed(0)}</p>
                   ) : (
-                    <p className="text-gray-600">No reward offered</p>
+                    <p className="text-2xl font-medium mb-2">No reward specified</p>
                   )}
-                  <p className="text-xs text-gray-500 mt-2">(Transactions are not made through Paw Finder)</p>
+                  <p className="text-sm text-white/70">(Transactions are not made through Paw Finder)</p>
                 </CardContent>
               </Card>
             )}
 
-            <Card className="border-2 border-orange-200 bg-orange-50">
+            {/* Report Info */}
+            <Card className="shadow-lg border-0">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-orange-800 mb-4 flex items-center gap-2">
-                  <User className="h-5 w-5" /> Contact Information
-                </h3>
-                <div className="space-y-3">
-                  {report.contactName && (
-                    <div className="flex items-center gap-3">
-                      <User className="h-5 w-5 text-orange-600" />
-                      <span className="font-medium">{report.contactName}</span>
-                    </div>
-                  )}
-                  {report.contactEmail && (
-                    <div className="flex items-center gap-3">
-                      <Mail className="h-5 w-5 text-orange-600" />
-                      <a href={`mailto:${report.contactEmail}`} className="font-medium text-blue-600 hover:underline">
-                        {report.contactEmail}
-                      </a>
-                    </div>
-                  )}
-                  {report.contactPhone && (
-                    <div className="flex items-center gap-3">
-                      <Phone className="h-5 w-5 text-orange-600" />
-                      <a href={`tel:${report.contactPhone}`} className="font-medium text-blue-600 hover:underline">
-                        {report.contactPhone}
-                      </a>
-                    </div>
-                  )}
-                </div>
+                <p className="text-sm text-gray-500">
+                  Report created on {format(new Date(report.createdAt), "MMMM d, yyyy 'at' h:mm a")}
+                </p>
+                {report.user && (
+                  <div className="flex items-center gap-3 mt-3 pt-3 border-t">
+                    {report.user.profileImageUrl ? (
+                      <img src={report.user.profileImageUrl} alt="" className="w-10 h-10 rounded-full" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                        <User className="h-5 w-5 text-gray-500" />
+                      </div>
+                    )}
+                    <p className="text-sm text-gray-600">
+                      Posted by <span className="font-medium">{report.user.firstName} {report.user.lastName}</span>
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
               </CardContent>
             </Card>
 

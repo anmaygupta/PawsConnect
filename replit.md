@@ -4,6 +4,11 @@ This is a modern web application called "Paw Finder" (also called "PawsConnect")
 
 # Recent Changes (November 25, 2025)
 
+- **Enhanced Security Hardening**: Additional security measures implemented
+  - **CSRF Protection Middleware**: Origin-based validation for all state-changing requests (POST/PUT/DELETE/PATCH) with safe Referer header parsing
+  - **Secure Session Cookies**: Using `__Host-` prefix with httpOnly, secure, sameSite='lax', and proper path settings
+  - **Protected User Data**: All API endpoints exclude user email addresses from public responses
+  - **Proper Logout**: Session destruction clears the correct cookie and removes from PostgreSQL store
 - **Report Detail Page**: Full-page view when clicking on any pet report
   - Large image display with thumbnail gallery for multiple photos
   - Pet Details section (color, size, age, gender) with colored icon badges

@@ -16,7 +16,7 @@ export default function RecentReports() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-foreground mb-4">Recent Reports</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            See the latest lost and found dog reports in your area. Help us reunite these precious pets with their families.
+            See the latest lost and found cat and dog reports in your area. Help us reunite these precious pets with their families.
           </p>
         </div>
         

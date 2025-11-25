@@ -377,7 +377,7 @@ export default function ReportForm() {
               <Textarea
                 id="description"
                 {...form.register('description')}
-                placeholder="Describe the dog's appearance, personality, and any distinguishing features..."
+                placeholder="Describe the pet's appearance, personality, and any distinguishing features..."
                 className="h-24"
                 data-testid="textarea-description"
               />
@@ -557,7 +557,7 @@ export default function ReportForm() {
               ) : (
                 <Send className="h-4 w-4 mr-2" />
               )}
-              Submit {reportType === 'lost' ? 'Lost' : 'Found'} Dog Report
+              Submit {reportType === 'lost' ? 'Lost' : 'Found'} Pet Report
             </Button>
           </div>
         </form>

@@ -36,12 +36,16 @@ export async function setupAuth(app: Express) {
 
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    // Support multiple domains: production deployment, dev domain, or custom domain
-    const domain = process.env.REPLIT_DEPLOYMENT_DOMAIN || 
-                   process.env.REPLIT_DEV_DOMAIN || 
-                   'localhost:5000';
+    // Use dev domain in development, production domain when deployed
+    // This ensures the callback matches the domain user is accessing from
+    const isProduction = process.env.NODE_ENV === 'production';
+    const domain = isProduction 
+      ? (process.env.REPLIT_DEPLOYMENT_DOMAIN || process.env.REPLIT_DEV_DOMAIN || 'localhost:5000')
+      : (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DEPLOYMENT_DOMAIN || 'localhost:5000');
     const protocol = 'https';
     const callbackURL = `${protocol}://${domain}/api/auth/google/callback`;
+    
+    console.log(`[auth] Google OAuth callback URL: ${callbackURL}`);
     
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,

@@ -8,6 +8,7 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Search from "@/pages/search";
 import Report from "@/pages/report";
+import ReportDetail from "@/pages/report-detail";
 import Stories from "@/pages/stories";
 import NotFound from "@/pages/not-found";
 
@@ -20,6 +21,7 @@ function Router() {
       {/* Public routes - accessible to everyone */}
       <Route path="/search" element={<Search />} />
       <Route path="/search/:zipCode" element={<Search />} />
+      <Route path="/report/:reportId" element={<ReportDetail />} />
       <Route path="/stories" element={<Stories />} />
       
       {/* Protected routes - require authentication */}

@@ -228,7 +228,11 @@ export default function Search() {
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {reports.map((report) => (
-                    <Card key={report.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <Card 
+                      key={report.id} 
+                      className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => navigate(`/report/${report.id}`)}
+                    >
                       {/* Report Image */}
                       {report.images && report.images.length > 0 ? (
                         <div className="h-64 overflow-hidden bg-muted">
@@ -261,7 +265,7 @@ export default function Search() {
                             )}
                           </div>
                           {isOwner(report) && (
-                            <div className="flex gap-1">
+                            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -315,6 +319,11 @@ export default function Search() {
                             {report.description}
                           </p>
                         )}
+
+                        {/* View Details Link */}
+                        <p className="text-sm text-primary mt-3 font-medium">
+                          Click to view full details →
+                        </p>
                       </CardContent>
                     </Card>
                   ))}

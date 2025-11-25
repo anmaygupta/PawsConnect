@@ -1,18 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/navigation";
 import ReportForm from "@/components/report-form";
 
 export default function Report() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      window.location.href = "/api/auth/google";
+    if (!isLoading) {
+      setHasCheckedAuth(true);
+      if (!isAuthenticated) {
+        window.location.href = "/api/auth/google";
+      }
     }
   }, [isAuthenticated, isLoading]);
 
-  if (isLoading) {
+  if (isLoading || !hasCheckedAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
@@ -21,7 +25,14 @@ export default function Report() {
   }
 
   if (!isAuthenticated) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Redirecting to sign in...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </div>
+    );
   }
 
   return (

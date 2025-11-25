@@ -15,32 +15,27 @@ export default function Home() {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/auth/google";
-      }, 500);
-      return;
+      navigate("/");
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   const { data: userReports = [], isLoading: reportsLoading } = useQuery<DogReportWithImages[]>({
     queryKey: ["/api/reports"],
     enabled: isAuthenticated,
   });
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (

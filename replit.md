@@ -2,7 +2,20 @@
 
 This is a modern web application called "Paw Finder" (also called "PawsConnect") designed to help reunite lost cats and dogs with their families. The platform allows users to report lost or found pets, search for reports by location, and facilitate communication between pet owners and finders. Built with a full-stack TypeScript architecture using React for the frontend and Express.js for the backend.
 
-# Recent Changes (November 24, 2025)
+# Recent Changes (November 25, 2025)
+
+- **Report Edit/Delete Functionality**: Complete implementation with ownership verification
+  - Edit modal allows updating pet name, breed, age, color, size, gender, description, location, ZIP code, and contact info
+  - Delete confirmation dialog with warning message
+  - Only report owners see edit/delete buttons on their own reports
+  - Comprehensive server-side validation: enforces required fields (description, color, location, ZIP, size, email), validates enums, prevents invalid data
+  - Frontend displays server validation error messages via toast notifications
+- **Flexible Contact Requirements**: Updated contact information handling
+  - Email address is mandatory for all reports
+  - Name and phone are optional with "Prefer not to share" checkboxes
+  - Database schema updated: contactName and contactPhone columns now nullable
+
+# Previous Changes (November 24, 2025)
 
 - **Critical Security Enhancements**: Complete security audit and hardening implemented
   - **Data Privacy**: User email addresses completely protected - only display names (firstName + lastName from Google) shown publicly on reports and stories

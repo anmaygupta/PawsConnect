@@ -5,7 +5,7 @@ import path from "path";
 import rateLimit from "express-rate-limit";
 import sanitizeHtml from "sanitize-html";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, getUserId } from "./auth";
+import { setupAuth, isAuthenticated, getUserId, csrfProtection } from "./auth";
 import { upload } from "./middleware/upload";
 import { EmailService } from "./services/emailService";
 import { insertDogReportSchema, insertStorySchema, insertStoryCommentSchema } from "@shared/schema";
@@ -31,6 +31,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Apply general rate limiting to all routes
   app.use('/api', generalRateLimit);
+
+  // Apply CSRF protection to all state-changing API routes
+  app.use('/api', csrfProtection);
 
   // Auth middleware
   await setupAuth(app);

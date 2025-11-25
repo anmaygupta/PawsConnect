@@ -1,9 +1,51 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
-import type { Express, RequestHandler } from "express";
+import type { Express, RequestHandler, Request, Response, NextFunction } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+
+// CSRF Protection: Verify origin for state-changing requests
+export const csrfProtection: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+  // Only check POST, PUT, DELETE requests
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+    const origin = req.get('Origin');
+    const referer = req.get('Referer');
+    const host = req.get('Host');
+    
+    // Allow requests without Origin/Referer (same-origin requests from some browsers)
+    if (!origin && !referer) {
+      return next();
+    }
+    
+    // Validate origin matches the host
+    const allowedOrigins = [
+      `https://${host}`,
+      `http://${host}`,
+      // Allow Replit dev domains
+      process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : '',
+      process.env.REPLIT_DEPLOYMENT_DOMAIN ? `https://${process.env.REPLIT_DEPLOYMENT_DOMAIN}` : '',
+    ].filter(Boolean);
+    
+    // Safely parse referer URL to extract origin
+    let requestOrigin = origin || '';
+    if (!requestOrigin && referer) {
+      try {
+        requestOrigin = new URL(referer).origin;
+      } catch (e) {
+        // Malformed Referer header - reject the request
+        console.warn(`[security] CSRF check failed: malformed Referer header`);
+        return res.status(403).json({ message: 'Forbidden: Invalid referer' });
+      }
+    }
+    
+    if (requestOrigin && !allowedOrigins.some(allowed => requestOrigin.startsWith(allowed))) {
+      console.warn(`[security] CSRF check failed: origin ${requestOrigin} not in allowed list`);
+      return res.status(403).json({ message: 'Forbidden: Invalid origin' });
+    }
+  }
+  next();
+};
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -14,16 +56,19 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    name: '__Host-session', // Security: Use __Host- prefix for secure cookies
     cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // CSRF protection
+      httpOnly: true, // Prevent JavaScript access to cookies
+      secure: true, // Always use secure in Replit (HTTPS)
+      sameSite: 'lax', // CSRF protection - prevents cross-site request forgery
       maxAge: sessionTtl,
+      path: '/', // Cookie is valid for all paths
     },
   });
 }
@@ -94,28 +139,66 @@ export async function setupAuth(app: Express) {
         failureRedirect: "/"
       }),
       (req, res) => {
-        // Successful authentication, redirect home
-        res.redirect("/");
+        // Security: Regenerate session after successful authentication
+        // This prevents session fixation attacks
+        const user = req.user;
+        req.session.regenerate((err) => {
+          if (err) {
+            console.error('[auth] Session regeneration error:', err);
+            return res.redirect('/');
+          }
+          // Re-establish the user after session regeneration
+          req.login(user as Express.User, (loginErr) => {
+            if (loginErr) {
+              console.error('[auth] Re-login error:', loginErr);
+              return res.redirect('/');
+            }
+            // Successful authentication, redirect home
+            res.redirect("/");
+          });
+        });
       }
     );
   }
 
-  // User info route
+  // User info route - returns only non-sensitive user data
   app.get("/api/auth/user", (req, res) => {
     if (req.isAuthenticated()) {
-      res.json(req.user);
+      const user = req.user as any;
+      // Return only public user information, exclude email for privacy
+      const publicUserData = {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+      };
+      res.json(publicUserData);
     } else {
       res.status(401).json({ message: "Unauthorized" });
     }
   });
 
-  // Logout route
+  // Logout route - properly destroy session for security
   app.post("/api/auth/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
+        console.error('[auth] Logout error:', err);
         return res.status(500).json({ message: "Logout failed" });
       }
-      res.json({ message: "Logged out successfully" });
+      // Security: Destroy the session completely to prevent session hijacking
+      req.session.destroy((destroyErr) => {
+        if (destroyErr) {
+          console.error('[auth] Session destroy error:', destroyErr);
+        }
+        // Clear the session cookie (must match the cookie name set in getSession)
+        res.clearCookie('__Host-session', { 
+          path: '/',
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax'
+        });
+        res.json({ message: "Logged out successfully" });
+      });
     });
   });
 }

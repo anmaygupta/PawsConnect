@@ -62,6 +62,8 @@ export interface IStorage {
   createStory(story: InsertStory, userId: string): Promise<Story>;
   getStories(limit?: number): Promise<StoryWithDetails[]>;
   getStory(id: string): Promise<StoryWithDetails | undefined>;
+  updateStory(id: string, updates: { title?: string; content?: string; rating?: number }): Promise<Story | undefined>;
+  deleteStory(id: string): Promise<void>;
   
   // Story image operations
   addStoryImage(image: InsertStoryImage): Promise<StoryImage>;
@@ -417,6 +419,27 @@ export class DatabaseStorage implements IStorage {
       images,
       comments,
     };
+  }
+
+  async updateStory(id: string, updates: { title?: string; content?: string; rating?: number }): Promise<Story | undefined> {
+    const [updatedStory] = await db
+      .update(stories)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(stories.id, id))
+      .returning();
+    return updatedStory;
+  }
+
+  async deleteStory(id: string): Promise<void> {
+    // Delete related data first (cascade should handle this, but being explicit)
+    await db.delete(storyImages).where(eq(storyImages.storyId, id));
+    await db.delete(storyReactions).where(eq(storyReactions.storyId, id));
+    await db.delete(storyComments).where(eq(storyComments.storyId, id));
+    // Delete the story
+    await db.delete(stories).where(eq(stories.id, id));
   }
 
   // Story image operations

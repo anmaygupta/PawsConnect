@@ -5,7 +5,9 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Heart, ThumbsUp, MessageCircle, PawPrint, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Heart, ThumbsUp, MessageCircle, PawPrint, X, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import Navigation from '@/components/navigation';
@@ -60,6 +62,13 @@ export default function Stories() {
   const [rating, setRating] = useState(5);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  // Edit/Delete state
+  const [editingStory, setEditingStory] = useState<Story | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [editRating, setEditRating] = useState(5);
+  const [deletingStoryId, setDeletingStoryId] = useState<string | null>(null);
 
   // Fetch stories
   const { data: stories = [], isLoading } = useQuery<Story[]>({
@@ -145,6 +154,48 @@ export default function Stories() {
     },
   });
 
+  // Update story mutation
+  const updateStoryMutation = useMutation({
+    mutationFn: async ({ storyId, title, content, rating }: { storyId: string; title: string; content: string; rating: number }) => {
+      const response = await fetch(`/api/stories/${storyId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ title, content, rating }),
+      });
+      if (!response.ok) throw new Error('Failed to update story');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/stories'] });
+      setEditingStory(null);
+      toast({ title: 'Story updated!', description: 'Your story has been updated successfully.' });
+    },
+    onError: () => {
+      toast({ title: 'Error', description: 'Failed to update story. Please try again.', variant: 'destructive' });
+    },
+  });
+
+  // Delete story mutation
+  const deleteStoryMutation = useMutation({
+    mutationFn: async (storyId: string) => {
+      const response = await fetch(`/api/stories/${storyId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to delete story');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/stories'] });
+      setDeletingStoryId(null);
+      toast({ title: 'Story deleted', description: 'Your story has been removed.' });
+    },
+    onError: () => {
+      toast({ title: 'Error', description: 'Failed to delete story. Please try again.', variant: 'destructive' });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -165,6 +216,36 @@ export default function Stories() {
       return;
     }
     reactToStoryMutation.mutate({ storyId, reactionType });
+  };
+
+  const handleEditClick = (story: Story) => {
+    setEditingStory(story);
+    setEditTitle(story.title);
+    setEditContent(story.content);
+    setEditRating(story.rating);
+  };
+
+  const handleEditSubmit = () => {
+    if (!editingStory) return;
+    if (!editTitle.trim() || !editContent.trim()) {
+      toast({ title: 'Error', description: 'Please fill in title and story', variant: 'destructive' });
+      return;
+    }
+    updateStoryMutation.mutate({
+      storyId: editingStory.id,
+      title: editTitle,
+      content: editContent,
+      rating: editRating,
+    });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deletingStoryId) return;
+    deleteStoryMutation.mutate(deletingStoryId);
+  };
+
+  const isOwner = (story: Story) => {
+    return user && (user as any).id === story.user.id;
   };
 
   const displayedStories = showAll ? stories : stories.slice(0, 3);
@@ -198,11 +279,31 @@ export default function Stories() {
                           by {story.user.firstName} {story.user.lastName} • {new Date(story.createdAt).toLocaleDateString()}
                         </p>
                         <div className="flex gap-1 mt-1">
-                          {[...Array(story.rating)].map((_, i) => (
+                          {Array.from({ length: story.rating }, (_, i) => (
                             <PawPrint key={i} className="w-4 h-4 fill-primary text-primary" />
                           ))}
                         </div>
                       </div>
+                      {isOwner(story) && (
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditClick(story)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeletingStoryId(story.id)}
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -374,6 +475,84 @@ export default function Stories() {
           </Card>
         </div>
       </div>
+
+      {/* Edit Story Dialog */}
+      <Dialog open={!!editingStory} onOpenChange={(open) => !open && setEditingStory(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Your Story</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Title *</label>
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="Story title"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Your Story *</label>
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="w-full min-h-[150px]"
+                placeholder="Your story..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Rating</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((paw) => (
+                  <button
+                    key={paw}
+                    type="button"
+                    onClick={() => setEditRating(paw)}
+                    className="focus:outline-none transition-all hover:scale-110"
+                  >
+                    <PawPrint
+                      className={`w-8 h-8 ${
+                        paw <= editRating ? 'fill-primary text-primary' : 'text-gray-300'
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingStory(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditSubmit} disabled={updateStoryMutation.isPending}>
+              {updateStoryMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingStoryId} onOpenChange={(open) => !open && setDeletingStoryId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Story?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this story? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteStoryMutation.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

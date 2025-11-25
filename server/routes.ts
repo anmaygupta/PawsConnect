@@ -375,6 +375,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update story (only by owner)
+  app.put('/api/stories/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = req.params.id;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
+
+      // Get the story and verify ownership
+      const story = await storage.getStory(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      if (story.user.id !== userId) {
+        return res.status(403).json({ message: "Not authorized to edit this story" });
+      }
+
+      const { title, content, rating } = req.body;
+      const updates: { title?: string; content?: string; rating?: number } = {};
+      
+      if (title !== undefined) updates.title = title;
+      if (content !== undefined) updates.content = content;
+      if (rating !== undefined) updates.rating = rating;
+
+      const updatedStory = await storage.updateStory(storyId, updates);
+      if (!updatedStory) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+
+      // Return the complete story with user data
+      const completeStory = await storage.getStory(storyId);
+      res.json(completeStory);
+    } catch (error) {
+      console.error("Error updating story:", error);
+      res.status(500).json({ message: "Failed to update story" });
+    }
+  });
+
+  // Delete story (only by owner)
+  app.delete('/api/stories/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = req.params.id;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
+
+      // Get the story and verify ownership
+      const story = await storage.getStory(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      if (story.user.id !== userId) {
+        return res.status(403).json({ message: "Not authorized to delete this story" });
+      }
+
+      await storage.deleteStory(storyId);
+      res.json({ message: "Story deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting story:", error);
+      res.status(500).json({ message: "Failed to delete story" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, AlertTriangle, CheckCircle, MapPin } from "lucide-react";
 import { lookupCity, formatConfirmation } from "@/lib/zipCodeLookup";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HeroSection() {
   const [zipCode, setZipCode] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const handleSearch = () => {
     if (zipCode.trim() && zipCode.length >= 5) {
@@ -39,11 +41,19 @@ export default function HeroSection() {
   };
 
   const handleReportLost = () => {
-    window.location.href = "/api/auth/google";
+    if (isAuthenticated) {
+      navigate("/report");
+    } else {
+      window.location.href = "/api/auth/google";
+    }
   };
 
   const handleReportFound = () => {
-    window.location.href = "/api/auth/google";
+    if (isAuthenticated) {
+      navigate("/report");
+    } else {
+      window.location.href = "/api/auth/google";
+    }
   };
 
   return (

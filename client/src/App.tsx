@@ -12,24 +12,20 @@ import Stories from "@/pages/stories";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
-
   return (
     <Routes>
+      {/* Main landing page - works for both guests and logged-in users */}
+      <Route path="/" element={<Landing />} />
+      
       {/* Public routes - accessible to everyone */}
       <Route path="/search" element={<Search />} />
       <Route path="/search/:zipCode" element={<Search />} />
       <Route path="/stories" element={<Stories />} />
       
-      {/* Conditional routes based on auth */}
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" element={<Landing />} />
-      ) : (
-        <>
-          <Route path="/" element={<Home />} />
-          <Route path="/report" element={<Report />} />
-        </>
-      )}
+      {/* Protected routes - require authentication */}
+      <Route path="/home" element={<Home />} />
+      <Route path="/report" element={<Report />} />
+      
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

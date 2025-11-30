@@ -5,7 +5,7 @@ integrations = ["replitmail:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["gh"]
+packages = ["gh", "openssh_gssapi"]
 
 [workflows]
 runButton = "Project"
